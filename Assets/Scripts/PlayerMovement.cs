@@ -14,6 +14,8 @@ public class PlayerController : MonoBehaviour
     private int currentPathIndex = 0;
     private bool isMoving = false;
 
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private NextNSpawner nextNSpawner;
     public enum PlayerColor { Red, Green, Blue, Yellow }
 
     void Awake()
@@ -23,15 +25,21 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        SetPlayerColor(PlayerColor.Yellow);
+        SetPlayerColor(PlayerColor.Red);
+        gameManager.currentPath = currentPath;
+        gameManager.currentPathIndex = currentPathIndex;
+        nextNSpawner.SpawnNextNCells(0);
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space) && !isMoving && currentPath != null)
         {
-            int steps = Random.Range(1, 7);
+            //int steps = Random.Range(1, 7);
+            int steps = 1;
             StartCoroutine(Move(steps));
+            gameManager.currentPathIndex = currentPathIndex;
+            nextNSpawner.SpawnNextNCells(currentPathIndex);
         }
     }
 
@@ -83,44 +91,53 @@ public class PlayerController : MonoBehaviour
         // The 52 squares of the main outer track (non colored squares)
         List<Vector2Int> mainPath = new List<Vector2Int>
         {
-            new Vector2Int(6, 1), 
-            new Vector2Int(6, 2), 
-            new Vector2Int(6, 3), 
-            new Vector2Int(6, 4), 
+            new Vector2Int(6, 1),
+            new Vector2Int(6, 2),
+            new Vector2Int(6, 3),
+            new Vector2Int(6, 4),
             new Vector2Int(6, 5),
-            new Vector2Int(5, 6), 
-            new Vector2Int(4, 6), 
-            new Vector2Int(3, 6), 
-            new Vector2Int(2, 6), 
-            new Vector2Int(1, 6), 
+            new Vector2Int(5, 6),
+            new Vector2Int(4, 6),
+            new Vector2Int(3, 6),
+            new Vector2Int(2, 6),
+            new Vector2Int(1, 6),
             new Vector2Int(0, 6),
             new Vector2Int(0, 7),
-            new Vector2Int(1, 8), 
-            new Vector2Int(2, 8), 
-            new Vector2Int(3, 8), 
-            new Vector2Int(4, 8), 
-            new Vector2Int(5, 8), 
+
+            new Vector2Int(0, 8),
+
+            new Vector2Int(1, 8),
+            new Vector2Int(2, 8),
+            new Vector2Int(3, 8),
+            new Vector2Int(4, 8),
+            new Vector2Int(5, 8),
             new Vector2Int(6, 8),
-            new Vector2Int(6, 9), 
-            new Vector2Int(6, 10),         
-            new Vector2Int(6, 11), 
-            new Vector2Int(6, 12), 
-            new Vector2Int(6, 13), 
+            new Vector2Int(6, 9),
+            new Vector2Int(6, 10),
+            new Vector2Int(6, 11),
+            new Vector2Int(6, 12),
+            new Vector2Int(6, 13),
             new Vector2Int(6, 14),
             new Vector2Int(7, 14),
-            new Vector2Int(8, 13), 
-            new Vector2Int(8, 12), 
-            new Vector2Int(8, 11), 
-            new Vector2Int(8, 10), 
-            new Vector2Int(8, 9), 
+
+            new Vector2Int(8, 14),
+
+            new Vector2Int(8, 13),
+            new Vector2Int(8, 12),
+            new Vector2Int(8, 11),
+            new Vector2Int(8, 10),
+            new Vector2Int(8, 9),
             new Vector2Int(8, 8),
-            new Vector2Int(9, 8), 
-            new Vector2Int(10, 8), 
-            new Vector2Int(11, 8), 
-            new Vector2Int(12, 8), 
-            new Vector2Int(13, 8), 
+            new Vector2Int(9, 8),
+            new Vector2Int(10, 8),
+            new Vector2Int(11, 8),
+            new Vector2Int(12, 8),
+            new Vector2Int(13, 8),
             new Vector2Int(14, 8),
             new Vector2Int(14, 7),
+
+            new Vector2Int(14, 6),
+
             new Vector2Int(13, 6), 
             new Vector2Int(12, 6), 
             new Vector2Int(11, 6), 
