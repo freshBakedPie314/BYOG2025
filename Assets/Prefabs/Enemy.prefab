@@ -83,6 +83,11 @@ MonoBehaviour:
   characterAbilities:
   - {fileID: 11400000, guid: 13b69619b9f1b0748bcd8540a7d217e5, type: 2}
   activeStatusEffects: []
+  normalAttack: {fileID: 11400000, guid: 13b69619b9f1b0748bcd8540a7d217e5, type: 2}
+  specialAbilityChance: 50
+  healingAbility: {fileID: 11400000, guid: 396703d153980764da90266fc2c65bfa, type: 2}
+  healAtHealthPercent: 0.3
+  isStunned: 0
 --- !u!1001 &8588877775023310601
 PrefabInstance:
   m_ObjectHideFlags: 0

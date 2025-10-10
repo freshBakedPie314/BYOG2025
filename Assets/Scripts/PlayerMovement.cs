@@ -107,7 +107,7 @@ public class PlayerController : MonoBehaviour
         }
         isMoving = false;
         gameManager.currentPathIndex = currentPathIndex;
-        battleManager.StartBattle();
+        battleManager.StartBattle(BattleManager.AreaType.Fire);
 
         
     }

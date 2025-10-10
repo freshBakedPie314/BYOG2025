@@ -209,6 +209,11 @@ MonoBehaviour:
   dialogueText: {fileID: 1515360689}
   spawner: {fileID: 157236911}
   gameManager: {fileID: 157236909}
+  fireAreaAbility: {fileID: 11400000, guid: 59b5dec23e0ec674e9f9e49b8b86e58b, type: 2}
+  snowAreaAbility: {fileID: 11400000, guid: 90c3b133bc2c45b4d98ddc43128078b4, type: 2}
+  earthAreaAbility: {fileID: 11400000, guid: 165b04c0a0e741d46a47f035935eac2f, type: 2}
+  lightningAreaAbility: {fileID: 11400000, guid: 5d7051cb52f4c704ea9bef1c5c7186a8, type: 2}
+  bossRewardAbility: {fileID: 0}
   currentState: 0
 --- !u!1 &174527139
 GameObject:

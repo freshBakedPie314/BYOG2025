@@ -8,7 +8,7 @@ public class BurnEffect : StatusEffect
 
     public override void OnTurnTick(CharacterStats target)
     {
-        base.OnTurnTick(target); // This calls duration-- from the base class
+        base.OnTurnTick(target);
         target.TakeDamage(damageOverTime);
         Debug.Log(target.name + " is burning!");
     }

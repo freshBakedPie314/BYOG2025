@@ -13,6 +13,17 @@ public class CharacterStats : MonoBehaviour
     public List<Ability> characterAbilities = new List<Ability>();
     public List<StatusEffect> activeStatusEffects = new List<StatusEffect>();
 
+    [Header("AI Configuration")]
+    public Ability normalAttack;
+
+    [Range(0, 100)]
+    public int specialAbilityChance = 50;
+
+    public Ability healingAbility;
+    [Range(0.1f, 1f)]
+    public float healAtHealthPercent = 0.3f;
+
+    public bool isStunned = false;
     void Awake()
     {
         currentHealth = maxHealth;
