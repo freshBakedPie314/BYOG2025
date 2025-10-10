@@ -31,6 +31,25 @@ public class CharacterStats : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        Debug.Log("TAKE DAMAGE CALLED on " + name + ". Checking for block... Active effects: " + activeStatusEffects.Count);
+        ChanceToBlockStatusEffect blockEffect = activeStatusEffects.Find(e => e is ChanceToBlockStatusEffect) as ChanceToBlockStatusEffect;
+        if (blockEffect != null)
+        {
+            activeStatusEffects.Remove(blockEffect);
+
+            int roll = Random.Range(1, 101);
+
+            if (roll <= blockEffect.blockChance)
+            {
+                Debug.Log(transform.name + " BLOCKED the attack! (Rolled " + roll + " vs " + blockEffect.blockChance + "%)");
+                return;
+            }
+            else
+            {
+                Debug.Log(transform.name + " failed to block. (Rolled " + roll + " vs " + blockEffect.blockChance + "%)");
+            }
+        }
+
         int damageToTake = Mathf.Max(damage - defense, 1);
         currentHealth -= damageToTake;
 
