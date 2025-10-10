@@ -3,6 +3,7 @@ using UnityEngine.UI; // Required for UI elements like Text
 using System.Collections;
 using Unity.Cinemachine; // You might see an error if Cinemachine isn't imported
 using TMPro;
+using Unity.VisualScripting;
 
 public class BattleManager : MonoBehaviour
 {
@@ -28,6 +29,7 @@ public class BattleManager : MonoBehaviour
     [Header("Manager")]
     public NextNSpawner spawner;
     public GameManager gameManager;
+    private BattleHUDManager battleHUDManager;
 
     [Header("Area Abilities")]
     public Ability fireAreaAbility;
@@ -46,6 +48,11 @@ public class BattleManager : MonoBehaviour
     private CharacterStats playerStats;
     private CharacterStats enemyStats;
     private Vector3 playerBoardPosition; // To remember where the player was
+
+    public void Start()
+    {
+        battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
+    }
 
     public void StartBattle(AreaType area)
     {
@@ -88,6 +95,8 @@ public class BattleManager : MonoBehaviour
 
         //Start the combat sequence
         currentState = BattleState.STARTING;
+        battleHUDManager.UpdateWarriors();
+        battleHUDManager.UpdateStats();
         StartCoroutine(BattleSequence());
     }
 
@@ -156,6 +165,7 @@ public class BattleManager : MonoBehaviour
                 character.activeStatusEffects.RemoveAt(i);
             }
         }
+        battleHUDManager.UpdateStats();
     }
 
     //-------------ENEMY AI-------------//
@@ -270,5 +280,10 @@ public class BattleManager : MonoBehaviour
 
         currentState = BattleState.INACTIVE;
         spawner.SpawnNextNCells(gameManager.currentPathIndex);
+    }
+
+    public GameObject GetCurrentEnemyInstance()
+    {
+        return currentEnemyInstance;
     }
 }
