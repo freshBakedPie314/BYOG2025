@@ -137,6 +137,20 @@ public class PlayerController : MonoBehaviour
                 transform.position = targetPosition;
             }
         }
+
+        // After moving, check the cell the player landed on.
+        RaycastHit hit;
+        // Raycast downwards to find the cell object
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 5f))
+        {
+            BoardCell landedCell = hit.collider.GetComponent<BoardCell>();
+            if (landedCell != null)
+            {
+                // We found a cell, now process its action!
+                ProcessCellAction(landedCell);
+            }
+        }
+
         isMoving = false;
         gameManager.currentPathIndex = currentPathIndex;
 
@@ -161,8 +175,8 @@ public class PlayerController : MonoBehaviour
 
         
     }
-    
-    
+
+
     //------------------------- PATH GENERATION LOGIC --------------------------------//
     private void GenerateAllPaths()
     {
@@ -257,6 +271,49 @@ public class PlayerController : MonoBehaviour
         paths[PlayerColor.Blue] = GenerateFullPath(mainPath, blueHome, blueStart , blueExtras);
         paths[PlayerColor.Red] = GenerateFullPath(mainPath, redHome, redStart, redExtras);
         paths[PlayerColor.Yellow] = GenerateFullPath(mainPath, yellowHome, yellowStart, yellowExtras);
+    }
+
+    void ProcessCellAction(BoardCell cell)
+    {
+        // Get the player's own CharacterStats component
+        CharacterStats playerStats = GetComponent<CharacterStats>();
+        // Get the data that the spawner assigned to this cell
+        CellData landedCellData = cell.GetData();
+
+        // Decide what to do based on the cell's type
+        switch (landedCellData.type)
+        {
+            case CellType.Enemy:
+                Debug.Log("Landed on an Enemy cell!");
+                // This will be the next step, for now it does nothing
+                // battleManager.StartBattle(landedCellData.potionReward);
+                break;
+
+            case CellType.Ally:
+                Debug.Log("Landed on an Ally cell!");
+
+                // Check which random buff this cell was given and apply it
+                switch (landedCellData.buffType)
+                {
+                    case PermaBuffType.Attack:
+                        playerStats.attackPower += 1;
+                        Debug.Log("Player attack permanently increased to " + playerStats.attackPower);
+                        break;
+                    case PermaBuffType.Defense:
+                        playerStats.defense += 1;
+                        Debug.Log("Player defense permanently increased to " + playerStats.defense);
+                        break;
+                    case PermaBuffType.Health:
+                        playerStats.maxHealth += 5;
+                        playerStats.Heal(5); // Also heal the player for the new max health
+                        Debug.Log("Player max health permanently increased to " + playerStats.maxHealth);
+                        break;
+                }
+
+                // Since there's no battle, the turn is over. Spawn the next set of cells.
+                nextNSpawner.SpawnNextNCells(currentPathIndex);
+                break;
+        }
     }
 
     private Vector3[] GenerateFullPath(List<Vector2Int> main, List<Vector2Int> home, Vector2Int start, List<Vector2Int> extras)
