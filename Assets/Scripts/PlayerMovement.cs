@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 using TMPro;
+using System.Security.Cryptography;
 
 public class PlayerController : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class PlayerController : MonoBehaviour
     private Vector3[] currentPath;
     private int currentPathIndex = 0;
     private bool isMoving = false;
+    public PlayerColor currentArea = PlayerColor.Red;
+    private PlayerColor startArea = PlayerColor.Red;
+    private PlayerColor[] areas = new PlayerColor[] { PlayerColor.Red, PlayerColor.Green, PlayerColor.Yellow, PlayerColor.Blue };
 
     [SerializeField] private GameManager gameManager;
     [SerializeField] private NextNSpawner nextNSpawner;
@@ -29,11 +33,32 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        SetPlayerColor(PlayerColor.Yellow);
+        //SetPlayerColor(PlayerColor.Yellow);
+        
+    }
+
+    public void StartGame(int col_id)
+    {
+        PlayerColor colour = PlayerColor.Red;
+        switch (col_id)
+        {
+            case 0:
+                colour = PlayerColor.Red;
+                break;
+            case 1:
+                colour = PlayerColor.Blue;
+                break;
+            case 2:
+                colour = PlayerColor.Yellow;
+                break;
+            default:
+                colour = PlayerColor.Green;
+                break;
+        }
+        SetPlayerColor(colour);
         gameManager.currentPath = currentPath;
         gameManager.currentPathIndex = currentPathIndex;
 
-        
 
         nextNSpawner.SpawnNextNCells(0);
     }
@@ -54,7 +79,8 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("Path for " + color + " not generated!");
             return;
         }
-
+        currentArea = color;
+        startArea = color;
         currentPath = paths[color];
         currentPathIndex = 0;
         transform.position = currentPath[0];
@@ -80,6 +106,12 @@ public class PlayerController : MonoBehaviour
 
         // Start the actual movement.
         StartCoroutine(Move(steps));
+        int currentAreaID = currentPathIndex * 4 / (currentPath.Length - 5);
+        int startID = System.Array.IndexOf(areas, startArea);
+        currentAreaID += startID;
+        currentAreaID %= 4;
+        currentArea = areas[currentAreaID];
+        print(currentArea);
 
         //Spwans next celsl(move after attack scene)
         
@@ -121,6 +153,27 @@ public class PlayerController : MonoBehaviour
 
         isMoving = false;
         gameManager.currentPathIndex = currentPathIndex;
+
+        BattleManager.AreaType a = BattleManager.AreaType.Fire;
+        switch(currentArea)
+        {
+            case PlayerColor.Red:
+                a = BattleManager.AreaType.Fire;
+                break;
+            case PlayerColor.Green:
+                a = BattleManager.AreaType.Earth;
+                break;
+            case PlayerColor.Blue:
+                a = BattleManager.AreaType.Snow;
+                break;
+            case PlayerColor.Yellow:
+                a = BattleManager.AreaType.Lightning;
+                break;
+        }
+
+        battleManager.StartBattle(a);
+
+        
     }
 
 
