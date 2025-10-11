@@ -196,11 +196,11 @@ public class PlayerController : MonoBehaviour
 
         switch (currentArea)
         {
-            case PlayerColor.Red: return BattleManager.AreaType.Fire;
-            case PlayerColor.Green: return BattleManager.AreaType.Earth;
-            case PlayerColor.Blue: return BattleManager.AreaType.Snow;
-            case PlayerColor.Yellow: return BattleManager.AreaType.Lightning;
-            default: return BattleManager.AreaType.None;
+            case PlayerColor.Red: return AreaType.Fire;
+            case PlayerColor.Green: return AreaType.Earth;
+            case PlayerColor.Blue: return AreaType.Snow;
+            case PlayerColor.Yellow: return AreaType.Lightning;
+            default: return AreaType.None;
         }
     }
 
