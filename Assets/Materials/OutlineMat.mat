@@ -41,6 +41,7 @@ Material:
     - _ColorThreshold: 2.2
     - _NormalThreshold: 1.11
     - _OVERLAY: 1
+    - _TestVar: 1
     m_Colors:
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
