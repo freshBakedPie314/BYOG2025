@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections;
 using TMPro;
 using static BattleManager;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -22,7 +23,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private NextNSpawner nextNSpawner;
     [SerializeField] private BattleManager battleManager;
-    [SerializeField] private TextMeshProUGUI textMeshProUGUI;
+    [SerializeField] private Image diceImageUI;
+    [SerializeField] private List<Sprite> diceImages;
     [SerializeField] private BattleHUDManager battleHUDManager;
 
     [Header("Boss Fights")]
@@ -39,6 +41,7 @@ public class PlayerController : MonoBehaviour
     [Header("UI")]
     public GameObject chohiceMenu;
 
+    public bool canMove = true;
     public enum PlayerColor { Red, Green, Yellow, Blue } // Order matters for indexing
     private BoardCell currentLandedCell;
 
@@ -50,8 +53,10 @@ public class PlayerController : MonoBehaviour
     public void StartGame(int col_id)
     {
         PlayerColor colour = (PlayerColor)col_id;
-        Instantiate(playerPrefabs[col_id], gameObject.transform);
-
+        GameObject go = Instantiate(playerPrefabs[col_id], gameObject.transform);
+        if (col_id == 1) go.transform.rotation = Quaternion.Euler(go.transform.rotation.eulerAngles.x - 90f,
+            go.transform.rotation.eulerAngles.y,
+            go.transform.rotation.eulerAngles.z);
         CharacterStats playerStats = GetComponent<CharacterStats>();
 
         currentArea = PlayerColor.Red + col_id;
@@ -72,7 +77,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && !isMoving && currentPath != null)
+        if (Input.GetMouseButtonDown(1) && !isMoving && currentPath != null && canMove)
         {
             StartCoroutine(AnimateAndMove());
         }
@@ -100,13 +105,13 @@ public class PlayerController : MonoBehaviour
         float timer = 0f;
         while (timer < animationTime)
         {
-            textMeshProUGUI.text = Random.Range(1, 7).ToString();
+            diceImageUI.sprite = diceImages[Random.Range(0, 6)];
             timer += Time.deltaTime;
             yield return null;
         }
 
         int steps = Random.Range(1, 7);
-        textMeshProUGUI.text = steps.ToString();
+        diceImageUI.sprite = diceImages[steps-1];
 
         areaBeforeMove = GetCurrentAreaColor();
 
@@ -217,11 +222,13 @@ public class PlayerController : MonoBehaviour
     public void ShowChoiceMenu()
     {
         chohiceMenu.SetActive(true);
+        canMove = false;
     }
 
     public void StartBattle()
     {
         chohiceMenu.SetActive(false);
+        
         if (currentLandedCell != null)
         {
             CellData data = currentLandedCell.GetData();
@@ -233,6 +240,7 @@ public class PlayerController : MonoBehaviour
     public void SkipBatlle()
     {
         chohiceMenu.SetActive(false);
+        canMove = true;
         nextNSpawner.SpawnNextNCells(gameManager.currentPathIndex);
     }
 

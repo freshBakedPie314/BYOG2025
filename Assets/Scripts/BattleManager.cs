@@ -29,6 +29,7 @@ public class BattleManager : MonoBehaviour
     public NextNSpawner spawner;
     public GameManager gameManager;
     private BattleHUDManager battleHUDManager;
+    private CameraShakeManager cameraShakeManager;
 
     [Header("Area Abilities")]
     public Ability fireAreaAbility;
@@ -69,9 +70,12 @@ public class BattleManager : MonoBehaviour
     public GameObject ultimateBossPrefab;
     public Ability slashAttack;
     public Ability healAbility;
+
+    private bool isAttackInProgress = false;
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
+        cameraShakeManager = CameraShakeManager.Instance;
     }
 
     // This is for NORMAL enemy battles
@@ -113,11 +117,6 @@ public class BattleManager : MonoBehaviour
         bossRewardAbility = skillToLearn;
         playerBoardPosition = player.transform.position;
 
-        boardHUD.SetActive(false);
-        board.SetActive(false);
-        battleHUD.SetActive(true);
-        battleArena.SetActive(true);
-
         player.transform.position = playerSpawnPoint.position;
         player.transform.rotation = playerSpawnPoint.rotation;
 
@@ -135,9 +134,6 @@ public class BattleManager : MonoBehaviour
         enemyStats.characterAbilities.Add(skillToLearn);
 
         playerStats = player.GetComponent<CharacterStats>();
-
-        boardVCam.Priority = 5;
-        battleVCam.Priority = 10;
 
         currentState = BattleState.STARTING;
         battleHUDManager.UpdateWarriors();
@@ -163,6 +159,8 @@ public class BattleManager : MonoBehaviour
 
     public void OnAbilityButton(Ability ability)
     {
+        if (isAttackInProgress) return;
+        isAttackInProgress = true;
         if (currentState != BattleState.PLAYERTURN)
             return;
         StartCoroutine(PlayerAction(ability));
@@ -201,7 +199,7 @@ public class BattleManager : MonoBehaviour
         if(ability.abilityName == "Slash")
         {
             yield return MoveForwardRoutine(1);
-            
+
         }
         else if(ability.abilityName == "Block")
         {
@@ -230,24 +228,28 @@ public class BattleManager : MonoBehaviour
         else if (ability.abilityName == "Burn")
         {
             GameObject blockfx = Instantiate(burnVFX, enemyStats.gameObject.transform);
+            cameraShakeManager.Shake(.8f);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
         else if (ability.abilityName == "Stun")
         {
             GameObject blockfx = Instantiate(stunVFX, enemyStats.gameObject.transform);
+            cameraShakeManager.Shake(.8f);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
         else if (ability.abilityName == "Quake")
         {
             GameObject blockfx = Instantiate(quakeVFX, enemyStats.gameObject.transform);
+            cameraShakeManager.Shake(.8f);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
         else if (ability.abilityName == "Frost")
         {
             GameObject blockfx = Instantiate(frostVFX, enemyStats.gameObject.transform);
+            cameraShakeManager.Shake(.8f);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
@@ -300,12 +302,9 @@ public class BattleManager : MonoBehaviour
             Ability abilityToUse = null;
             string actionText = "";
 
-            // --- MODIFIED HEALING LOGIC ---
-            // 1. Check if health is low AND it has a healing ability.
             bool shouldConsiderHealing = enemyStats.healingAbility != null &&
                                          enemyStats.currentHealth < (enemyStats.maxHealth * enemyStats.healAtHealthPercent);
 
-            // 2. If it should consider healing, roll a 20% chance.
             if (shouldConsiderHealing && Random.Range(1, 101) <= 20)
             {
                 abilityToUse = enemyStats.healingAbility;
@@ -315,8 +314,7 @@ public class BattleManager : MonoBehaviour
                 Destroy(blockfx);
                 abilityToUse.Execute(enemyStats, enemyStats); // Target is self for healing
             }
-            // --- END OF MODIFIED LOGIC ---
-            else // Otherwise, proceed to attack logic as normal.
+            else
             {
                 int randomChance = Random.Range(0, 100);
                 if (enemyStats.characterAbilities.Count > 0 && randomChance < enemyStats.specialAbilityChance)
@@ -335,6 +333,7 @@ public class BattleManager : MonoBehaviour
                     {
                         yield return MoveForwardRoutine(-1);
                         GameObject impact = Instantiate(impactVFX, enemyStats.gameObject.transform);
+                        cameraShakeManager.Shake(.8f);
                         yield return new WaitForSeconds(0.5f);
                         Destroy(impact);
                     }
@@ -365,24 +364,28 @@ public class BattleManager : MonoBehaviour
                     else if (abilityToUse.abilityName == "Burn")
                     {
                         GameObject blockfx = Instantiate(burnVFX, player.transform);
+                        cameraShakeManager.Shake(.8f);
                         yield return new WaitForSeconds(2.5f);
                         Destroy(blockfx);
                     }
                     else if (abilityToUse.abilityName == "Stun")
                     {
                         GameObject blockfx = Instantiate(stunVFX, player.transform);
+                        cameraShakeManager.Shake(.8f);
                         yield return new WaitForSeconds(2.5f);
                         Destroy(blockfx);
                     }
                     else if (abilityToUse.abilityName == "Quake")
                     {
                         GameObject blockfx = Instantiate(quakeVFX, player.transform);
+                        cameraShakeManager.Shake(.8f);
                         yield return new WaitForSeconds(2.5f);
                         Destroy(blockfx);
                     }
                     else if (abilityToUse.abilityName == "Frost")
                     {
                         GameObject blockfx = Instantiate(frostVFX, player.transform);
+                        cameraShakeManager.Shake(.8f);
                         yield return new WaitForSeconds(2.5f);
                         Destroy(blockfx);
                     }
@@ -396,6 +399,7 @@ public class BattleManager : MonoBehaviour
 
             dialogueText.text = actionText;
             yield return new WaitForSeconds(2f);
+            isAttackInProgress = false;
         }
 
         battleHUDManager.UpdateStats();
@@ -492,7 +496,7 @@ public class BattleManager : MonoBehaviour
 
         // 2️⃣ Wait at the new position
         yield return SpawnSlashVFX(direction,pawn,opp);
-
+        CameraShakeManager.Instance.Shake(.8f);
         // 3️⃣ Move back
         yield return MoveBetween(pawn, endPos, startPos, moveDuration);
     }
@@ -552,7 +556,7 @@ public class BattleManager : MonoBehaviour
         battleHUD.SetActive(false);
         board.SetActive(true);
         boardHUD.SetActive(true);
-
+        player.GetComponent<PlayerController>().canMove = true;
         currentState = BattleState.INACTIVE;
         spawner.SpawnNextNCells(gameManager.currentPathIndex);
     }

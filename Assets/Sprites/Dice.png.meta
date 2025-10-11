@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4ef29fde85fc5dc47a5a9a6af732ddcf
+guid: c794f6df49bc15649b93d46575c0da96
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -97,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Sigils_0
+      name: Dice_0
       rect:
         serializedVersion: 2
         x: 0
@@ -112,14 +112,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 83e1d48a7e169cc4c975bb3bdcf89ac5
-      internalID: 318742062
+      spriteID: 5b0cc58c688c98349b5f7d660af60ecb
+      internalID: -1130141462
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sigils_1
+      name: Dice_1
       rect:
         serializedVersion: 2
         x: 256
@@ -134,14 +134,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: fddc85de5505e16489a5cbc71a4d982d
-      internalID: 1216370943
+      spriteID: ee0461ac2568736418976787b991bf18
+      internalID: 1544846698
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sigils_2
+      name: Dice_2
       rect:
         serializedVersion: 2
         x: 512
@@ -156,14 +156,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5f4e41395d3e5cd49b5deb490a73605f
-      internalID: -2138742615
+      spriteID: 00131e89260617b44925d70532f9a295
+      internalID: -1820222539
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sigils_3
+      name: Dice_3
       rect:
         serializedVersion: 2
         x: 768
@@ -178,8 +178,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 29f8fa54bc2e5db4c84245b7c0fe48c9
-      internalID: 62999585
+      spriteID: 7106a823e44ae7d4ca194fc80bbc2f86
+      internalID: 678958617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dice_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 29534a7e444659e438fc8dd9c4d821a7
+      internalID: 420662813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dice_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7502b51bbffb5bd498ba9dbacdbd3ecc
+      internalID: -1424632871
       vertices: []
       indices: 
       edges: []
@@ -188,7 +232,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 01a6ea1de3ba60942b5e3ae3247cbead
+    spriteID: ab11074d8f5ea7b4589ec1a56af388ee
     internalID: 0
     vertices: []
     indices: 
@@ -198,12 +242,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":4.0,"y":1.0},"gridSpriteSize":{"x":256.0,"y":256.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":6.0,"y":1.0},"gridSpriteSize":{"x":256.0,"y":256.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Sigils_0: 318742062
-      Sigils_1: 1216370943
-      Sigils_2: -2138742615
-      Sigils_3: 62999585
+      Dice_0: -1130141462
+      Dice_1: 1544846698
+      Dice_2: -1820222539
+      Dice_3: 678958617
+      Dice_4: 420662813
+      Dice_5: -1424632871
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
