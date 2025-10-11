@@ -41,7 +41,7 @@ public class BattleManager : MonoBehaviour
     public Ability bossRewardAbility;
 
     public enum BattleState { INACTIVE, STARTING, PLAYERTURN, ENEMYTURN, WON, LOST }
-    public enum AreaType { None, Fire, Snow, Earth, Lightning }
+    public enum AreaType { Fire, Earth, Lightning, Snow }
     public BattleState currentState;
 
     private GameObject currentEnemyInstance;
@@ -81,6 +81,7 @@ public class BattleManager : MonoBehaviour
             case AreaType.Earth: enemyStats.characterAbilities.Add(earthAreaAbility); break;
             case AreaType.Lightning: enemyStats.characterAbilities.Add(lightningAreaAbility); break;
         }
+        print("Starting battle in area " + area.ToString());
         playerStats = player.GetComponent<CharacterStats>();
 
         boardVCam.Priority = 5;
@@ -106,7 +107,9 @@ public class BattleManager : MonoBehaviour
         player.transform.position = playerSpawnPoint.position;
         player.transform.rotation = playerSpawnPoint.rotation;
 
-        currentEnemyInstance = Instantiate(bossPrefab, enemySpawnPoint.position, enemySpawnPoint.rotation);
+        Quaternion rot = Quaternion.Euler(enemySpawnPoint.rotation.x -90, enemySpawnPoint.rotation.y, enemySpawnPoint.rotation.z);
+
+        currentEnemyInstance = Instantiate(bossPrefab, enemySpawnPoint.position, rot);
         enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
 
         enemyStats.maxHealth = 200;

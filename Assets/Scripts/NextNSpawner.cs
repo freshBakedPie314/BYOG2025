@@ -47,7 +47,7 @@ public class NextNSpawner : MonoBehaviour
                 int pathIndex = Mathf.Min(playerCellIndex + i + 1, gameManager.currentPath.Length - 1);
                 Vector3 spawnPosition = gameManager.currentPath[pathIndex];
                 GameObject spawnedCellObject = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
-
+                dataForThisCell.pos = spawnPosition;
                 spawnedCellObject.GetComponent<BoardCell>().Initialize(dataForThisCell);
 
                 spawnedReferences.Add(spawnedCellObject);

@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
     private bool isMoving = false;
 
     public PlayerColor currentArea;
-    public PlayerColor startArea;
+    public PlayerColor startArea = PlayerColor.Red;
     public PlayerColor previousArea;
     private PlayerColor[] areas = new PlayerColor[] { PlayerColor.Red, PlayerColor.Green, PlayerColor.Yellow, PlayerColor.Blue };
 
@@ -174,11 +174,11 @@ public class PlayerController : MonoBehaviour
         CellData landedCellData = cell.GetData();
         switch (landedCellData.type)
         {
-            case PlayerColor.Red: return AreaType.Fire;
-            case PlayerColor.Green: return AreaType.Earth;
-            case PlayerColor.Blue: return AreaType.Snow;
-            case PlayerColor.Yellow: return AreaType.Lightning;
-            default: return AreaType.None;
+            // case PlayerColor.Red: return AreaType.Fire;
+            // case PlayerColor.Green: return AreaType.Earth;
+            // case PlayerColor.Blue: return AreaType.Snow;
+            // case PlayerColor.Yellow: return AreaType.Lightning;
+            // default: return AreaType.None;
             case CellType.Enemy:
                 currentLandedCell = cell;
                 ShowChoiceMenu();
@@ -197,7 +197,7 @@ public class PlayerController : MonoBehaviour
 
     private PlayerColor GetCurrentAreaColor()
     {
-        int pathLength = 56;
+        int pathLength = currentPath.Length - 5;
         int segmentLength = pathLength / 4;
         int currentSegment = currentPathIndex / segmentLength;
         int startID = (int)startArea;
