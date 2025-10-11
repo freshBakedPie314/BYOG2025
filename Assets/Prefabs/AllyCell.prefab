@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6344043939020373513}
   - component: {fileID: 7784373775614114098}
   - component: {fileID: 1354643380053785500}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: AllyCell
   m_TagString: Untagged
   m_Icon: {fileID: 0}

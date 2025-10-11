@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5845671222888370331}
   - component: {fileID: 6713329535340260647}
   - component: {fileID: 7516830016083105867}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: EnemyCell
   m_TagString: Untagged
   m_Icon: {fileID: 0}

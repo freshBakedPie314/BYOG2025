@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections;
 using TMPro;
 using System.Security.Cryptography;
+using UnityEngine.Rendering;
 
 public class PlayerController : MonoBehaviour
 {
@@ -24,6 +25,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private BattleManager battleManager;
 
     [SerializeField] private TextMeshProUGUI textMeshProUGUI;
+
+    [Header("Physics")]
+    public LayerMask boardCellLayer;
+
+    [Header("Player Prefabs")]
+    public List<GameObject> playerPrefabs = new List<GameObject>();
+
+    [Header("Managers")]
+    public NextNSpawner spawner;
+
+    [Header("UI")]
+    public GameObject chohiceMenu;
     public enum PlayerColor { Red, Green, Blue, Yellow }
 
     void Awake()
@@ -43,18 +56,23 @@ public class PlayerController : MonoBehaviour
         switch (col_id)
         {
             case 0:
+                Instantiate(playerPrefabs[0] , gameObject.transform);
                 colour = PlayerColor.Red;
                 break;
             case 1:
+                Instantiate(playerPrefabs[1], gameObject.transform);
                 colour = PlayerColor.Blue;
                 break;
             case 2:
+                Instantiate(playerPrefabs[2], gameObject.transform);
                 colour = PlayerColor.Yellow;
                 break;
             default:
+                Instantiate(playerPrefabs[3], gameObject.transform);
                 colour = PlayerColor.Green;
                 break;
         }
+        //
         SetPlayerColor(colour);
         gameManager.currentPath = currentPath;
         gameManager.currentPathIndex = currentPathIndex;
@@ -74,6 +92,7 @@ public class PlayerController : MonoBehaviour
 
     public void SetPlayerColor(PlayerColor color)
     {
+        //
         if (!paths.ContainsKey(color))
         {
             Debug.LogError("Path for " + color + " not generated!");
@@ -97,14 +116,12 @@ public class PlayerController : MonoBehaviour
         {
             textMeshProUGUI.text = Random.Range(1, 7).ToString();
             timer += Time.deltaTime;
-            yield return null; // Wait for the next frame.
+            yield return null;
         }
 
-        // Set the final number.
         int steps = Random.Range(1, 7);
         textMeshProUGUI.text = steps.ToString();
 
-        // Start the actual movement.
         StartCoroutine(Move(steps));
         int currentAreaID = currentPathIndex * 4 / (currentPath.Length - 5);
         int startID = System.Array.IndexOf(areas, startArea);
@@ -113,7 +130,6 @@ public class PlayerController : MonoBehaviour
         currentArea = areas[currentAreaID];
         print(currentArea);
 
-        //Spwans next celsl(move after attack scene)
         
     }
 
@@ -138,44 +154,71 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // After moving, check the cell the player landed on.
+        Vector3 rayOrigin = transform.position + Vector3.up * 3f;
         RaycastHit hit;
-        // Raycast downwards to find the cell object
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 5f))
+
+        //Debug.DrawRay(rayOrigin, Vector3.down * 5f, Color.red, 500f);
+
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, 5f, boardCellLayer))
         {
+            Debug.Log("Raycast HIT something! Object name: " + hit.collider.name);
+
             BoardCell landedCell = hit.collider.GetComponent<BoardCell>();
             if (landedCell != null)
             {
-                // We found a cell, now process its action!
+                Debug.Log("SUCCESS: Found BoardCell. Processing action...");
+                gameManager.currentPathIndex = currentPathIndex;
                 ProcessCellAction(landedCell);
             }
+            else
+            {
+                Debug.Log("ERROR: The object hit does NOT have a BoardCell script attached.");
+            }
+        }
+        else
+        {
+            Debug.Log("Raycast FAILED. The ray did not hit any colliders.");
         }
 
         isMoving = false;
         gameManager.currentPathIndex = currentPathIndex;
 
-        BattleManager.AreaType a = BattleManager.AreaType.Fire;
-        switch(currentArea)
-        {
-            case PlayerColor.Red:
-                a = BattleManager.AreaType.Fire;
-                break;
-            case PlayerColor.Green:
-                a = BattleManager.AreaType.Earth;
-                break;
-            case PlayerColor.Blue:
-                a = BattleManager.AreaType.Snow;
-                break;
-            case PlayerColor.Yellow:
-                a = BattleManager.AreaType.Lightning;
-                break;
-        }
-
-        battleManager.StartBattle(a);
-
-        
     }
 
+    private BattleManager.AreaType GetCurrentArea()
+    {
+        int currentAreaID = currentPathIndex * 4 / (currentPath.Length - 5);
+        int startID = System.Array.IndexOf(areas, startArea);
+        currentAreaID = (currentAreaID + startID) % 4;
+        currentArea = areas[currentAreaID];
+        print("Current Area is: " + currentArea);
+
+        switch (currentArea)
+        {
+            case PlayerColor.Red: return BattleManager.AreaType.Fire;
+            case PlayerColor.Green: return BattleManager.AreaType.Earth;
+            case PlayerColor.Blue: return BattleManager.AreaType.Snow;
+            case PlayerColor.Yellow: return BattleManager.AreaType.Lightning;
+            default: return BattleManager.AreaType.None;
+        }
+    }
+
+
+    public void ShowChoiceMenu()
+    {
+        chohiceMenu.SetActive(true);
+    }
+
+    public void StartBattle()
+    {
+        BattleManager.AreaType area = GetCurrentArea();
+        battleManager.StartBattle(area);
+    }
+
+    public void SkipBatlle()
+    {
+        spawner.SpawnNextNCells(gameManager.currentPathIndex);
+    }
 
     //------------------------- PATH GENERATION LOGIC --------------------------------//
     private void GenerateAllPaths()
@@ -275,43 +318,19 @@ public class PlayerController : MonoBehaviour
 
     void ProcessCellAction(BoardCell cell)
     {
-        // Get the player's own CharacterStats component
         CharacterStats playerStats = GetComponent<CharacterStats>();
-        // Get the data that the spawner assigned to this cell
         CellData landedCellData = cell.GetData();
 
-        // Decide what to do based on the cell's type
         switch (landedCellData.type)
         {
             case CellType.Enemy:
                 Debug.Log("Landed on an Enemy cell!");
-                // This will be the next step, for now it does nothing
-                // battleManager.StartBattle(landedCellData.potionReward);
+                ShowChoiceMenu();
                 break;
 
             case CellType.Ally:
                 Debug.Log("Landed on an Ally cell!");
-
-                // Check which random buff this cell was given and apply it
-                switch (landedCellData.buffType)
-                {
-                    case PermaBuffType.Attack:
-                        playerStats.attackPower += 1;
-                        Debug.Log("Player attack permanently increased to " + playerStats.attackPower);
-                        break;
-                    case PermaBuffType.Defense:
-                        playerStats.defense += 1;
-                        Debug.Log("Player defense permanently increased to " + playerStats.defense);
-                        break;
-                    case PermaBuffType.Health:
-                        playerStats.maxHealth += 5;
-                        playerStats.Heal(5); // Also heal the player for the new max health
-                        Debug.Log("Player max health permanently increased to " + playerStats.maxHealth);
-                        break;
-                }
-
-                // Since there's no battle, the turn is over. Spawn the next set of cells.
-                nextNSpawner.SpawnNextNCells(currentPathIndex);
+                spawner.SpawnNextNCells(gameManager.currentPathIndex);
                 break;
         }
     }

@@ -317,7 +317,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   diceFace: 6
-  minAllyCells: 2
+  minAllyCells: 6
   enemyCellPrefab: {fileID: 7107538795256604531, guid: 758721071549fd24b8432467d249d0ca, type: 3}
   allyCellPrefab: {fileID: 6918848428961024151, guid: 5dc713a03d0565c4685dc15a9720cb26, type: 3}
   possiblePotionRewards:
@@ -5004,6 +5004,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AllyCell
       objectReference: {fileID: 0}
+    - target: {fileID: 6918848428961024151, guid: 5dc713a03d0565c4685dc15a9720cb26, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5061,6 +5065,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemyCell
       objectReference: {fileID: 0}
+    - target: {fileID: 7107538795256604531, guid: 758721071549fd24b8432467d249d0ca, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5074,18 +5082,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1322819231117218074, guid: f4018b852bb5ff6409143066edf17264, type: 3}
-      propertyPath: characterAbilities.Array.size
-      value: 2
+    - target: {fileID: 1196925976275463858, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: m_Size.y
+      value: 1.0637195
       objectReference: {fileID: 0}
-    - target: {fileID: 1322819231117218074, guid: f4018b852bb5ff6409143066edf17264, type: 3}
-      propertyPath: 'characterAbilities.Array.data[0]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 13b69619b9f1b0748bcd8540a7d217e5, type: 2}
-    - target: {fileID: 1322819231117218074, guid: f4018b852bb5ff6409143066edf17264, type: 3}
-      propertyPath: 'characterAbilities.Array.data[1]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 572ce7f49fb4db344a025afff56204d5, type: 2}
+    - target: {fileID: 1196925976275463858, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: m_Center.y
+      value: 0.47107148
+      objectReference: {fileID: 0}
     - target: {fileID: 2017767270813654433, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: m_LocalPosition.x
       value: -14.21
@@ -5127,6 +5131,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: spawner
+      value: 
+      objectReference: {fileID: 157236911}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: gameManager
       value: 
       objectReference: {fileID: 157236909}
@@ -5142,6 +5150,34 @@ PrefabInstance:
       propertyPath: textMeshProUGUI
       value: 
       objectReference: {fileID: 1648895680}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: boardCellLayer.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: playerPrefabs.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'playerPrefabs.Array.data[0]'
+      value: 
+      objectReference: {fileID: 3182662420771863573, guid: a82375ffdfc0252409f1030aebccf639, type: 3}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'playerPrefabs.Array.data[1]'
+      value: 
+      objectReference: {fileID: 4277758987807065708, guid: 09bf6ca09f3a4bf4ba732865ad8a3183, type: 3}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'playerPrefabs.Array.data[2]'
+      value: 
+      objectReference: {fileID: 27724773543583031, guid: 1c039c5099864734da2cbecf7f334872, type: 3}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'playerPrefabs.Array.data[3]'
+      value: 
+      objectReference: {fileID: 7612127733755895569, guid: e4f8466d289731c4da89583addb89177, type: 3}
+    - target: {fileID: 5633227483926769662, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6797241037575706937, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: m_Name
       value: Player

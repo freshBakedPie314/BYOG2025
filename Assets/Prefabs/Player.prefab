@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 6797241037575706937}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.21, y: 0.5, z: -4.1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -78,10 +78,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 10
+  currentArea: 0
   gameManager: {fileID: 0}
   nextNSpawner: {fileID: 0}
   battleManager: {fileID: 0}
   textMeshProUGUI: {fileID: 0}
+  boardCellLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  playerPrefabs: []
 --- !u!114 &1322819231117218074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,8 +103,15 @@ MonoBehaviour:
   currentHealth: 0
   attackPower: 10
   defense: 5
-  characterAbilities: []
+  characterAbilities:
+  - {fileID: 11400000, guid: 13b69619b9f1b0748bcd8540a7d217e5, type: 2}
+  - {fileID: 11400000, guid: 572ce7f49fb4db344a025afff56204d5, type: 2}
   activeStatusEffects: []
+  normalAttack: {fileID: 0}
+  specialAbilityChance: 50
+  healingAbility: {fileID: 0}
+  healAtHealthPercent: 0.3
+  isStunned: 0
 --- !u!1001 &4822325358124667567
 PrefabInstance:
   m_ObjectHideFlags: 0
