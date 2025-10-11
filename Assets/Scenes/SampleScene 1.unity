@@ -181,8 +181,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   diceFace: 6
+  minAllyCells: 2
+  enemyCellPrefab: {fileID: 0}
+  allyCellPrefab: {fileID: 0}
+  possiblePotionRewards: []
   gameManager: {fileID: 157236909}
-  temp: {fileID: 41092299185765055, guid: a6fa732adc2a733439d2f13a86ca09c0, type: 3}
 --- !u!114 &157236912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -971,7 +974,7 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 5000
+  m_ColorTemperature: 4633
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
