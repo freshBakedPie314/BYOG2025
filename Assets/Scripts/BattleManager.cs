@@ -110,7 +110,7 @@ public class BattleManager : MonoBehaviour
     void PlayerTurn()
     {
         playerStats.PrintPotionInventory();
-
+        battleHUDManager.UpdateActionButtons(playerStats);
         dialogueText.text = "Player's Turn. Choose your move.";
 
         //TODO: Unlock player attack one by one 

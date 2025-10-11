@@ -27,6 +27,12 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI textMeshProUGUI;
 
+    [Header("Area Abilities")]
+    public Ability fireAreaAbility;
+    public Ability snowAreaAbility;
+    public Ability earthAreaAbility;
+    public Ability lightningAreaAbility;
+
     [Header("Physics")]
     public LayerMask boardCellLayer;
 
@@ -38,6 +44,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("UI")]
     public GameObject chohiceMenu;
+    public BattleHUDManager battleHUDManager;
     public enum PlayerColor { Red, Green, Blue, Yellow }
     private BoardCell currentLandedCell;
     void Awake()
@@ -58,22 +65,29 @@ public class PlayerController : MonoBehaviour
         {
             case 0:
                 Instantiate(playerPrefabs[0] , gameObject.transform);
+                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(fireAreaAbility);
                 colour = PlayerColor.Red;
                 break;
             case 1:
                 Instantiate(playerPrefabs[1], gameObject.transform);
+                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(snowAreaAbility);
+
                 colour = PlayerColor.Blue;
                 break;
             case 2:
                 Instantiate(playerPrefabs[2], gameObject.transform);
+                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(lightningAreaAbility);
                 colour = PlayerColor.Yellow;
                 break;
             default:
                 Instantiate(playerPrefabs[3], gameObject.transform);
+                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(earthAreaAbility);
                 colour = PlayerColor.Green;
                 break;
         }
         //
+        battleHUDManager.UpdateActionButtons(gameObject.GetComponent<CharacterStats>());
+        battleHUDManager.gameObject.SetActive(false);
         SetPlayerColor(colour);
         gameManager.currentPath = currentPath;
         gameManager.currentPathIndex = currentPathIndex;

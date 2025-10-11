@@ -1,25 +1,37 @@
-using TMPro;
-using UnityEditor.UI;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System.Collections.Generic;
 
 public class BattleHUDManager : MonoBehaviour
 {
-    GameObject player;
-    GameObject enemy;
-    public BattleManager battleManager;
+    [Header("Health Displays")]
     public TextMeshProUGUI playerHealthText;
     public TextMeshProUGUI enemyHealthText;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    [Header("Action Buttons")]
+    [Tooltip("Drag all of your action buttons (Stun, Heal, etc.) here.")]
+    public List<ActionButtonUI> actionButtons;
+
+    // References
+    private GameObject player;
+    private GameObject enemy;
+    public BattleManager battleManager;
+
     void Start()
     {
-        
+        foreach (ActionButtonUI button in actionButtons)
+        {
+            button.Initialize(battleManager);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UpdateActionButtons(CharacterStats playerStats)
     {
-
+        foreach (ActionButtonUI button in actionButtons)
+        {
+            button.UpdateState(playerStats);
+        }
     }
 
     public void UpdateWarriors()
@@ -27,10 +39,12 @@ public class BattleHUDManager : MonoBehaviour
         player = battleManager.player;
         enemy = battleManager.GetCurrentEnemyInstance();
     }
-    
+
     public void UpdateStats()
     {
-        playerHealthText.text = player.GetComponent<CharacterStats>().currentHealth.ToString();
-        enemyHealthText.text = enemy.GetComponent<CharacterStats>().currentHealth.ToString();
+        if (player != null)
+            playerHealthText.text = player.GetComponent<CharacterStats>().currentHealth.ToString();
+        if (enemy != null)
+            enemyHealthText.text = enemy.GetComponent<CharacterStats>().currentHealth.ToString();
     }
 }
