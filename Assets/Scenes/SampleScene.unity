@@ -1002,7 +1002,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 3
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -3137,7 +3137,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 3
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -7232,13 +7232,17 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: bossSkillRewards.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: 'playerPrefabs.Array.data[0]'
       value: 
       objectReference: {fileID: 3182662420771863573, guid: a82375ffdfc0252409f1030aebccf639, type: 3}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: 'playerPrefabs.Array.data[1]'
       value: 
-      objectReference: {fileID: 4277758987807065708, guid: 09bf6ca09f3a4bf4ba732865ad8a3183, type: 3}
+      objectReference: {fileID: 7612127733755895569, guid: e4f8466d289731c4da89583addb89177, type: 3}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: 'playerPrefabs.Array.data[2]'
       value: 
@@ -7246,7 +7250,23 @@ PrefabInstance:
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: 'playerPrefabs.Array.data[3]'
       value: 
-      objectReference: {fileID: 7612127733755895569, guid: e4f8466d289731c4da89583addb89177, type: 3}
+      objectReference: {fileID: 4277758987807065708, guid: 09bf6ca09f3a4bf4ba732865ad8a3183, type: 3}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'bossSkillRewards.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 59b5dec23e0ec674e9f9e49b8b86e58b, type: 2}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'bossSkillRewards.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 90c3b133bc2c45b4d98ddc43128078b4, type: 2}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'bossSkillRewards.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 5d7051cb52f4c704ea9bef1c5c7186a8, type: 2}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: 'bossSkillRewards.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 165b04c0a0e741d46a47f035935eac2f, type: 2}
     - target: {fileID: 5633227483926769662, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: m_IsActive
       value: 0

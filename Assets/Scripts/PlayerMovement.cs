@@ -3,96 +3,70 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 using TMPro;
-using System.Security.Cryptography;
-using UnityEngine.Rendering;
 using static BattleManager;
 
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 10f;
-
-    //This dic holds generated paths for each class
     private Dictionary<PlayerColor, Vector3[]> paths = new Dictionary<PlayerColor, Vector3[]>();
-
     private Vector3[] currentPath;
     private int currentPathIndex = 0;
     private bool isMoving = false;
-    public PlayerColor currentArea = PlayerColor.Red;
-    private PlayerColor startArea = PlayerColor.Red;
+
+    public PlayerColor currentArea;
+    public PlayerColor startArea;
+    public PlayerColor previousArea;
     private PlayerColor[] areas = new PlayerColor[] { PlayerColor.Red, PlayerColor.Green, PlayerColor.Yellow, PlayerColor.Blue };
 
+    [Header("Serialized References")]
     [SerializeField] private GameManager gameManager;
     [SerializeField] private NextNSpawner nextNSpawner;
     [SerializeField] private BattleManager battleManager;
-
     [SerializeField] private TextMeshProUGUI textMeshProUGUI;
+    [SerializeField] private BattleHUDManager battleHUDManager;
 
-    [Header("Area Abilities")]
-    public Ability fireAreaAbility;
-    public Ability snowAreaAbility;
-    public Ability earthAreaAbility;
-    public Ability lightningAreaAbility;
+    [Header("Boss Fights")]
+    [Tooltip("Assign skill rewards in order: Red(Fire), Blue(Snow), Yellow(Lightning), Green(Earth)")]
+    public List<Ability> bossSkillRewards = new List<Ability>();
 
     [Header("Physics")]
     public LayerMask boardCellLayer;
 
     [Header("Player Prefabs")]
+    [Tooltip("Assign prefabs in order: Red, Blue, Yellow, Green")]
     public List<GameObject> playerPrefabs = new List<GameObject>();
-
-    [Header("Managers")]
-    public NextNSpawner spawner;
 
     [Header("UI")]
     public GameObject chohiceMenu;
-    public BattleHUDManager battleHUDManager;
-    public enum PlayerColor { Red, Green, Blue, Yellow }
+
+    public enum PlayerColor { Red, Green, Yellow, Blue } // Order matters for indexing
     private BoardCell currentLandedCell;
+
     void Awake()
     {
         GenerateAllPaths();
     }
 
-    void Start()
-    {
-        //SetPlayerColor(PlayerColor.Yellow);
-        
-    }
-
     public void StartGame(int col_id)
     {
-        PlayerColor colour = PlayerColor.Red;
-        switch (col_id)
-        {
-            case 0:
-                Instantiate(playerPrefabs[0] , gameObject.transform);
-                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(fireAreaAbility);
-                colour = PlayerColor.Red;
-                break;
-            case 1:
-                Instantiate(playerPrefabs[1], gameObject.transform);
-                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(snowAreaAbility);
+        PlayerColor colour = (PlayerColor)col_id;
+        Instantiate(playerPrefabs[col_id], gameObject.transform);
 
-                colour = PlayerColor.Blue;
-                break;
-            case 2:
-                Instantiate(playerPrefabs[2], gameObject.transform);
-                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(lightningAreaAbility);
-                colour = PlayerColor.Yellow;
-                break;
-            default:
-                Instantiate(playerPrefabs[3], gameObject.transform);
-                gameObject.GetComponent<CharacterStats>().characterAbilities.Add(earthAreaAbility);
-                colour = PlayerColor.Green;
-                break;
-        }
-        //
-        battleHUDManager.UpdateActionButtons(gameObject.GetComponent<CharacterStats>());
-        battleHUDManager.gameObject.SetActive(false);
+        CharacterStats playerStats = GetComponent<CharacterStats>();
+
+        currentArea = PlayerColor.Red + col_id;
         SetPlayerColor(colour);
+        previousArea = startArea;
+
+        if (playerStats != null && bossSkillRewards.Count > col_id)
+        {
+            playerStats.characterAbilities.Add(bossSkillRewards[col_id]);
+            battleHUDManager.UpdateActionButtons(playerStats);
+            battleHUDManager.gameObject.SetActive(false);
+        }
+
         gameManager.currentPath = currentPath;
         gameManager.currentPathIndex = currentPathIndex;
-
-
         nextNSpawner.SpawnNextNCells(0);
     }
 
@@ -104,29 +78,22 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     public void SetPlayerColor(PlayerColor color)
     {
-        //
-        if (!paths.ContainsKey(color))
-        {
-            Debug.LogError("Path for " + color + " not generated!");
-            return;
-        }
-        currentArea = color;
+        if (!paths.ContainsKey(color)) return;
         startArea = color;
         currentPath = paths[color];
         currentPathIndex = 0;
         transform.position = currentPath[0];
         isMoving = false;
     }
-
+    public PlayerColor areaBeforeMove;
+    public PlayerColor areaAfterMove;
     IEnumerator AnimateAndMove()
     {
+        isMoving = true;
         float animationTime = 1f;
         float timer = 0f;
-
-        // Animate random numbers for 1 second.
         while (timer < animationTime)
         {
             textMeshProUGUI.text = Random.Range(1, 7).ToString();
@@ -137,29 +104,43 @@ public class PlayerController : MonoBehaviour
         int steps = Random.Range(1, 7);
         textMeshProUGUI.text = steps.ToString();
 
-        StartCoroutine(Move(steps));
-        int currentAreaID = currentPathIndex * 4 / (currentPath.Length - 5);
-        int startID = System.Array.IndexOf(areas, startArea);
-        currentAreaID += startID;
-        currentAreaID %= 4;
-        currentArea = areas[currentAreaID];
-        print(currentArea);
+        areaBeforeMove = GetCurrentAreaColor();
 
-        
+        yield return StartCoroutine(Move(steps));
+
+        this.currentArea = GetCurrentAreaColor();
+
+        areaAfterMove = GetCurrentAreaColor();
+
+        if (areaAfterMove != areaBeforeMove && areaBeforeMove != startArea)
+        {
+            Debug.Log("NEW AREA ENTERED! Spawning boss from previous area: " + areaBeforeMove);
+            int previousAreaIndex = (int)areaBeforeMove;
+            GameObject bossToFight = playerPrefabs[previousAreaIndex];
+            Ability skillToLearn = bossSkillRewards[previousAreaIndex];
+
+            if (bossToFight != null && skillToLearn != null)
+            {
+                battleManager.StartBossBattle(bossToFight, skillToLearn);
+            }
+        }
+        else
+        {
+            CheckLandedCell();
+        }
+
+        isMoving = false;
+        gameManager.currentPathIndex = currentPathIndex;
     }
 
     public IEnumerator Move(int steps)
     {
-        if (isMoving) yield break;
-        isMoving = true;
-
         for (int i = 0; i < steps; i++)
         {
             if (currentPathIndex + 1 < currentPath.Length)
             {
                 currentPathIndex++;
                 Vector3 targetPosition = currentPath[currentPathIndex];
-
                 while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
                 {
                     transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
@@ -168,56 +149,56 @@ public class PlayerController : MonoBehaviour
                 transform.position = targetPosition;
             }
         }
+    }
 
-        Vector3 rayOrigin = transform.position + Vector3.up * 3f;
+    private void CheckLandedCell()
+    {
         RaycastHit hit;
-
-        //Debug.DrawRay(rayOrigin, Vector3.down * 5f, Color.red, 500f);
-
-        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, 5f, boardCellLayer))
+        if (Physics.Raycast(transform.position + Vector3.up * 3f, Vector3.down, out hit, 5f, boardCellLayer))
         {
-            Debug.Log("Raycast HIT something! Object name: " + hit.collider.name);
-
             BoardCell landedCell = hit.collider.GetComponent<BoardCell>();
             if (landedCell != null)
             {
-                Debug.Log("SUCCESS: Found BoardCell. Processing action...");
-                gameManager.currentPathIndex = currentPathIndex;
                 ProcessCellAction(landedCell);
-            }
-            else
-            {
-                Debug.Log("ERROR: The object hit does NOT have a BoardCell script attached.");
             }
         }
         else
         {
-            Debug.Log("Raycast FAILED. The ray did not hit any colliders.");
+            nextNSpawner.SpawnNextNCells(currentPathIndex);
         }
-
-        isMoving = false;
-        gameManager.currentPathIndex = currentPathIndex;
-
     }
 
-    private BattleManager.AreaType GetCurrentArea()
+    void ProcessCellAction(BoardCell cell)
     {
-        int currentAreaID = currentPathIndex * 4 / (currentPath.Length - 5);
-        int startID = System.Array.IndexOf(areas, startArea);
-        currentAreaID = (currentAreaID + startID) % 4;
-        currentArea = areas[currentAreaID];
-        print("Current Area is: " + currentArea);
-
-        switch (currentArea)
+        CharacterStats playerStats = GetComponent<CharacterStats>();
+        CellData landedCellData = cell.GetData();
+        switch (landedCellData.type)
         {
-            case PlayerColor.Red: return BattleManager.AreaType.Fire;
-            case PlayerColor.Green: return BattleManager.AreaType.Earth;
-            case PlayerColor.Blue: return BattleManager.AreaType.Snow;
-            case PlayerColor.Yellow: return BattleManager.AreaType.Lightning;
-            default: return BattleManager.AreaType.None;
+            case CellType.Enemy:
+                currentLandedCell = cell;
+                ShowChoiceMenu();
+                break;
+            case CellType.Ally:
+                switch (landedCellData.buffType)
+                {
+                    case PermaBuffType.Attack: playerStats.attackPower += 1; break;
+                    case PermaBuffType.Defense: playerStats.defense += 1; break;
+                    case PermaBuffType.Health: playerStats.maxHealth += 5; playerStats.Heal(5); break;
+                }
+                nextNSpawner.SpawnNextNCells(currentPathIndex);
+                break;
         }
     }
 
+    private PlayerColor GetCurrentAreaColor()
+    {
+        int pathLength = 56;
+        int segmentLength = pathLength / 4;
+        int currentSegment = currentPathIndex / segmentLength;
+        int startID = (int)startArea;
+        int currentAreaID = (startID + currentSegment) % 4;
+        return (PlayerColor)currentAreaID;
+    }
 
     public void ShowChoiceMenu()
     {
@@ -230,16 +211,15 @@ public class PlayerController : MonoBehaviour
         if (currentLandedCell != null)
         {
             CellData data = currentLandedCell.GetData();
-
-            // Get the area and the reward, then start the battle
-            AreaType area = GetCurrentArea();
-            battleManager.StartBattle(area, data.potionReward); // Pass both parameters
+            AreaType area = (AreaType)GetCurrentAreaColor();
+            battleManager.StartBattle(area, data.potionReward);
         }
     }
 
     public void SkipBatlle()
     {
-        spawner.SpawnNextNCells(gameManager.currentPathIndex);
+        chohiceMenu.SetActive(false);
+        nextNSpawner.SpawnNextNCells(gameManager.currentPathIndex);
     }
 
     //------------------------- PATH GENERATION LOGIC --------------------------------//
@@ -250,72 +230,72 @@ public class PlayerController : MonoBehaviour
 
         // The 52 squares of the main outer track (non colored squares)
         List<Vector2Int> mainPath = new List<Vector2Int>
-        {
-            new Vector2Int(6, 1),
-            new Vector2Int(6, 2),
-            new Vector2Int(6, 3),
-            new Vector2Int(6, 4),
-            new Vector2Int(6, 5),
-            new Vector2Int(5, 6),
-            new Vector2Int(4, 6),
-            new Vector2Int(3, 6),
-            new Vector2Int(2, 6),
-            new Vector2Int(1, 6),
-            new Vector2Int(0, 6),
-            new Vector2Int(0, 7),
+     {
+         new Vector2Int(6, 1),
+         new Vector2Int(6, 2),
+         new Vector2Int(6, 3),
+         new Vector2Int(6, 4),
+         new Vector2Int(6, 5),
+         new Vector2Int(5, 6),
+         new Vector2Int(4, 6),
+         new Vector2Int(3, 6),
+         new Vector2Int(2, 6),
+         new Vector2Int(1, 6),
+         new Vector2Int(0, 6),
+         new Vector2Int(0, 7),
 
-            
 
-            new Vector2Int(1, 8),
-            new Vector2Int(2, 8),
-            new Vector2Int(3, 8),
-            new Vector2Int(4, 8),
-            new Vector2Int(5, 8),
-            //new Vector2Int(6, 8),
-            new Vector2Int(6, 9),
-            new Vector2Int(6, 10),
-            new Vector2Int(6, 11),
-            new Vector2Int(6, 12),
-            new Vector2Int(6, 13),
-            new Vector2Int(6, 14),
-            new Vector2Int(7, 14),
 
-            
+         new Vector2Int(1, 8),
+         new Vector2Int(2, 8),
+         new Vector2Int(3, 8),
+         new Vector2Int(4, 8),
+         new Vector2Int(5, 8),
+         //new Vector2Int(6, 8),
+         new Vector2Int(6, 9),
+         new Vector2Int(6, 10),
+         new Vector2Int(6, 11),
+         new Vector2Int(6, 12),
+         new Vector2Int(6, 13),
+         new Vector2Int(6, 14),
+         new Vector2Int(7, 14),
 
-            new Vector2Int(8, 13),
-            new Vector2Int(8, 12),
-            new Vector2Int(8, 11),
-            new Vector2Int(8, 10),
-            new Vector2Int(8, 9),
-            //new Vector2Int(8, 8),
-            new Vector2Int(9, 8),
-            new Vector2Int(10, 8),
-            new Vector2Int(11, 8),
-            new Vector2Int(12, 8),
-            new Vector2Int(13, 8),
-            new Vector2Int(14, 8),
-            new Vector2Int(14, 7),
 
-            
 
-            new Vector2Int(13, 6), 
-            new Vector2Int(12, 6), 
-            new Vector2Int(11, 6), 
-            new Vector2Int(10, 6), 
-            new Vector2Int(9, 6), 
-            //new Vector2Int(8, 6),
-            new Vector2Int(8, 5), 
-            new Vector2Int(8, 4), 
-            new Vector2Int(8, 3), 
-            new Vector2Int(8, 2), 
-            new Vector2Int(8, 1), 
-            new Vector2Int(8, 0),
-            new Vector2Int(7, 0)
-        };
+         new Vector2Int(8, 13),
+         new Vector2Int(8, 12),
+         new Vector2Int(8, 11),
+         new Vector2Int(8, 10),
+         new Vector2Int(8, 9),
+         //new Vector2Int(8, 8),
+         new Vector2Int(9, 8),
+         new Vector2Int(10, 8),
+         new Vector2Int(11, 8),
+         new Vector2Int(12, 8),
+         new Vector2Int(13, 8),
+         new Vector2Int(14, 8),
+         new Vector2Int(14, 7),
+
+
+
+         new Vector2Int(13, 6),
+         new Vector2Int(12, 6),
+         new Vector2Int(11, 6),
+         new Vector2Int(10, 6),
+         new Vector2Int(9, 6), 
+         //new Vector2Int(8, 6),
+         new Vector2Int(8, 5),
+         new Vector2Int(8, 4),
+         new Vector2Int(8, 3),
+         new Vector2Int(8, 2),
+         new Vector2Int(8, 1),
+         new Vector2Int(8, 0),
+         new Vector2Int(7, 0)
+     };
 
         //additional points
         List<Vector2Int> yellowExtras = new List<Vector2Int> { new Vector2Int(0, 8), new Vector2Int(8, 14), new Vector2Int(14, 6), };
-        List<Vector2Int> blueExtras = new List<Vector2Int> { new Vector2Int(8, 14), new Vector2Int(14, 6), new Vector2Int(6, 0)};
+        List<Vector2Int> blueExtras = new List<Vector2Int> { new Vector2Int(8, 14), new Vector2Int(14, 6), new Vector2Int(6, 0) };
         List<Vector2Int> redExtras = new List<Vector2Int> { new Vector2Int(14, 6), new Vector2Int(6, 0), new Vector2Int(0, 8) };
         List<Vector2Int> greenExtras = new List<Vector2Int> { new Vector2Int(6, 0), new Vector2Int(0, 8), new Vector2Int(8, 14) };
 
@@ -333,48 +313,11 @@ public class PlayerController : MonoBehaviour
 
         // Generate and store the full path for each color
         paths[PlayerColor.Green] = GenerateFullPath(mainPath, greenHome, greenStart, greenExtras);
-        paths[PlayerColor.Blue] = GenerateFullPath(mainPath, blueHome, blueStart , blueExtras);
+        paths[PlayerColor.Blue] = GenerateFullPath(mainPath, blueHome, blueStart, blueExtras);
         paths[PlayerColor.Red] = GenerateFullPath(mainPath, redHome, redStart, redExtras);
         paths[PlayerColor.Yellow] = GenerateFullPath(mainPath, yellowHome, yellowStart, yellowExtras);
     }
 
-    void ProcessCellAction(BoardCell cell)
-    {
-        CharacterStats playerStats = GetComponent<CharacterStats>();
-        CellData landedCellData = cell.GetData();
-
-        switch (landedCellData.type)
-        {
-            case CellType.Enemy:
-                Debug.Log("Landed on an Enemy cell!");
-                currentLandedCell = cell;
-                ShowChoiceMenu();
-                break;
-
-            case CellType.Ally:
-                Debug.Log("Landed on an Ally cell!");
-
-                switch (landedCellData.buffType)
-                {
-                    case PermaBuffType.Attack:
-                        playerStats.attackPower += 1;
-                        Debug.Log("Player attack permanently increased to " + playerStats.attackPower);
-                        break;
-                    case PermaBuffType.Defense:
-                        playerStats.defense += 1;
-                        Debug.Log("Player defense permanently increased to " + playerStats.defense);
-                        break;
-                    case PermaBuffType.Health:
-                        playerStats.maxHealth += 5;
-                        playerStats.Heal(5); // Also heal the player for the new max health
-                        Debug.Log("Player max health permanently increased to " + playerStats.maxHealth);
-                        break;
-                }
-
-                nextNSpawner.SpawnNextNCells(gameManager.currentPathIndex);
-                break;
-        }
-    }
 
     private Vector3[] GenerateFullPath(List<Vector2Int> main, List<Vector2Int> home, Vector2Int start, List<Vector2Int> extras)
     {
@@ -390,9 +333,9 @@ public class PlayerController : MonoBehaviour
                 fullPathGrid.Add(extras[0]);
             else if (i == 23)
                 fullPathGrid.Add(extras[1]);
-            else if(i == 35)
+            else if (i == 35)
                 fullPathGrid.Add(extras[2]);
-            
+
         }
 
         // Add home column
