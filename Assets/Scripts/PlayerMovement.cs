@@ -55,6 +55,13 @@ public class PlayerController : MonoBehaviour
     public enum PlayerColor { Red, Green, Yellow, Blue } // Order matters for indexing
     private BoardCell currentLandedCell;
 
+
+    public GameObject blessingPanel;
+    public TextMeshProUGUI blessingDesc;
+    public string permahealDesc;
+    public string permaDmgIncDesc;
+    public string permaDefIncDec;
+
     void Awake()
     {
         GenerateAllPaths();
@@ -210,9 +217,21 @@ public class PlayerController : MonoBehaviour
             case CellType.Ally:
                 switch (landedCellData.buffType)
                 {
-                    case PermaBuffType.Attack: playerStats.attackPower += 1; break;
-                    case PermaBuffType.Defense: playerStats.defense += 1; break;
-                    case PermaBuffType.Health: playerStats.maxHealth += 5; playerStats.Heal(5); break;
+                    case PermaBuffType.Attack: 
+                        playerStats.attackPower += 1;
+                        blessingDesc.text = permaDmgIncDesc;
+                        blessingPanel.SetActive(true);
+                        break;
+                    case PermaBuffType.Defense: 
+                        playerStats.defense += 1;
+                        blessingDesc.text = permaDefIncDec;
+                        blessingPanel.SetActive(true);
+                        break;
+                    case PermaBuffType.Health: 
+                        playerStats.maxHealth += 5;
+                        blessingDesc.text = permahealDesc;
+                        blessingPanel.SetActive(true);
+                        break;
                 }
                 nextNSpawner.SpawnNextNCells(currentPathIndex);
                 break;
