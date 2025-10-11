@@ -111,7 +111,7 @@ public class PlayerController : MonoBehaviour
         }
 
         int steps = Random.Range(1, 7);
-        diceImageUI.sprite = diceImages[steps-1];
+        diceImageUI.sprite = diceImages[steps - 1];
 
         areaBeforeMove = GetCurrentAreaColor();
 
@@ -228,7 +228,7 @@ public class PlayerController : MonoBehaviour
     public void StartBattle()
     {
         chohiceMenu.SetActive(false);
-        
+
         if (currentLandedCell != null)
         {
             CellData data = currentLandedCell.GetData();
@@ -252,7 +252,7 @@ public class PlayerController : MonoBehaviour
 
         // The 52 squares of the main outer track (non colored squares)
         List<Vector2Int> mainPath = new List<Vector2Int>
-     {
+       {
          new Vector2Int(6, 1),
          new Vector2Int(6, 2),
          new Vector2Int(6, 3),
@@ -304,7 +304,7 @@ public class PlayerController : MonoBehaviour
          new Vector2Int(12, 6),
          new Vector2Int(11, 6),
          new Vector2Int(10, 6),
-         new Vector2Int(9, 6), 
+         new Vector2Int(9, 6),
          //new Vector2Int(8, 6),
          new Vector2Int(8, 5),
          new Vector2Int(8, 4),
@@ -313,7 +313,7 @@ public class PlayerController : MonoBehaviour
          new Vector2Int(8, 1),
          new Vector2Int(8, 0),
          new Vector2Int(7, 0)
-     };
+       };
 
         //additional points
         List<Vector2Int> yellowExtras = new List<Vector2Int> { new Vector2Int(0, 8), new Vector2Int(8, 14), new Vector2Int(14, 6), };
@@ -367,8 +367,10 @@ public class PlayerController : MonoBehaviour
         List<Vector3> worldPath = new List<Vector3>();
         foreach (var point in fullPathGrid)
         {
-            // This assumes your 15x15 plane is centered at (0,0,0) and (1.5, 1.5, 1.5) scale
-            worldPath.Add(new Vector3(point.x - 7f, 0.1f, point.y - 7f));
+            // --- MODIFIED ---
+            // Inverted the coordinates to account for a 180-degree board rotation.
+            // This effectively calculates the world position for (14-x, 14-y) instead of (x,y).
+            worldPath.Add(new Vector3(7f - point.x, 0.1f, 7f - point.y));
         }
 
         return worldPath.ToArray();
