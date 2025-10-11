@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Heal Potion
   m_EditorClassIdentifier: 
   abilityName: Heal
-  power: 15
+  power: 10
   targetType: 1

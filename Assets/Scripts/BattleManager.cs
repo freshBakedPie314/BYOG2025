@@ -48,14 +48,15 @@ public class BattleManager : MonoBehaviour
     private CharacterStats playerStats;
     private CharacterStats enemyStats;
     private Vector3 playerBoardPosition; // To remember where the player was
-
+    private Ability currentRewardOnWin;
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
     }
 
-    public void StartBattle(AreaType area)
+    public void StartBattle(AreaType area, Ability rewardOnWin)
     {
+        currentRewardOnWin = rewardOnWin; // Store the reward
         playerBoardPosition = player.transform.position;
 
         boardHUD.SetActive(false);
@@ -66,7 +67,6 @@ public class BattleManager : MonoBehaviour
         player.transform.position = playerSpawnPoint.position;
         player.transform.rotation = playerSpawnPoint.rotation;
 
-        //CHANGE: Dont spawn random emey byt dcide based on area
         int enemyIndex = Random.Range(0, enemyPrefabs.Length);
         currentEnemyInstance = Instantiate(enemyPrefabs[enemyIndex], enemySpawnPoint.position, enemySpawnPoint.rotation);
         enemyStats = currentEnemyInstance.GetComponent<CharacterStats>();
@@ -88,12 +88,10 @@ public class BattleManager : MonoBehaviour
                 break;
         }
         playerStats = player.GetComponent<CharacterStats>();
-       
 
         boardVCam.Priority = 5;
         battleVCam.Priority = 10;
 
-        //Start the combat sequence
         currentState = BattleState.STARTING;
         battleHUDManager.UpdateWarriors();
         battleHUDManager.UpdateStats();
@@ -111,6 +109,8 @@ public class BattleManager : MonoBehaviour
 
     void PlayerTurn()
     {
+        playerStats.PrintPotionInventory();
+
         dialogueText.text = "Player's Turn. Choose your move.";
 
         //TODO: Unlock player attack one by one 
@@ -186,13 +186,20 @@ public class BattleManager : MonoBehaviour
             Ability abilityToUse = null;
             string actionText = "";
 
-            if (enemyStats.healingAbility != null && enemyStats.currentHealth < (enemyStats.maxHealth * enemyStats.healAtHealthPercent))
+            // --- MODIFIED HEALING LOGIC ---
+            // 1. Check if health is low AND it has a healing ability.
+            bool shouldConsiderHealing = enemyStats.healingAbility != null &&
+                                         enemyStats.currentHealth < (enemyStats.maxHealth * enemyStats.healAtHealthPercent);
+
+            // 2. If it should consider healing, roll a 20% chance.
+            if (shouldConsiderHealing && Random.Range(1, 101) <= 20)
             {
                 abilityToUse = enemyStats.healingAbility;
                 actionText = "Enemy heals itself!";
                 abilityToUse.Execute(enemyStats, enemyStats); // Target is self for healing
             }
-            else
+            // --- END OF MODIFIED LOGIC ---
+            else // Otherwise, proceed to attack logic as normal.
             {
                 int randomChance = Random.Range(0, 100);
                 if (enemyStats.characterAbilities.Count > 0 && randomChance < enemyStats.specialAbilityChance)
@@ -246,10 +253,19 @@ public class BattleManager : MonoBehaviour
         if (currentState == BattleState.WON)
         {
             dialogueText.text = "You won the battle!";
+
+            // First, check for a special boss reward
             if (bossRewardAbility != null && !playerStats.characterAbilities.Contains(bossRewardAbility))
             {
                 playerStats.characterAbilities.Add(bossRewardAbility);
                 dialogueText.text += "\nYou learned " + bossRewardAbility.abilityName + "!";
+            }
+            // If it wasn't a boss fight, check for a regular potion reward
+            else if (currentRewardOnWin != null)
+            {
+                playerStats.AddPotion(currentRewardOnWin, 1);
+                dialogueText.text += "\nYou received a " + currentRewardOnWin.name + "!";
+                playerStats.PrintPotionInventory();
             }
         }
         else if (currentState == BattleState.LOST)

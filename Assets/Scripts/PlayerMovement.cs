@@ -5,6 +5,7 @@ using System.Collections;
 using TMPro;
 using System.Security.Cryptography;
 using UnityEngine.Rendering;
+using static BattleManager;
 
 public class PlayerController : MonoBehaviour
 {
@@ -38,7 +39,7 @@ public class PlayerController : MonoBehaviour
     [Header("UI")]
     public GameObject chohiceMenu;
     public enum PlayerColor { Red, Green, Blue, Yellow }
-
+    private BoardCell currentLandedCell;
     void Awake()
     {
         GenerateAllPaths();
@@ -211,8 +212,15 @@ public class PlayerController : MonoBehaviour
 
     public void StartBattle()
     {
-        BattleManager.AreaType area = GetCurrentArea();
-        battleManager.StartBattle(area);
+        chohiceMenu.SetActive(false);
+        if (currentLandedCell != null)
+        {
+            CellData data = currentLandedCell.GetData();
+
+            // Get the area and the reward, then start the battle
+            AreaType area = GetCurrentArea();
+            battleManager.StartBattle(area, data.potionReward); // Pass both parameters
+        }
     }
 
     public void SkipBatlle()
@@ -325,12 +333,31 @@ public class PlayerController : MonoBehaviour
         {
             case CellType.Enemy:
                 Debug.Log("Landed on an Enemy cell!");
+                currentLandedCell = cell;
                 ShowChoiceMenu();
                 break;
 
             case CellType.Ally:
                 Debug.Log("Landed on an Ally cell!");
-                spawner.SpawnNextNCells(gameManager.currentPathIndex);
+
+                switch (landedCellData.buffType)
+                {
+                    case PermaBuffType.Attack:
+                        playerStats.attackPower += 1;
+                        Debug.Log("Player attack permanently increased to " + playerStats.attackPower);
+                        break;
+                    case PermaBuffType.Defense:
+                        playerStats.defense += 1;
+                        Debug.Log("Player defense permanently increased to " + playerStats.defense);
+                        break;
+                    case PermaBuffType.Health:
+                        playerStats.maxHealth += 5;
+                        playerStats.Heal(5); // Also heal the player for the new max health
+                        Debug.Log("Player max health permanently increased to " + playerStats.maxHealth);
+                        break;
+                }
+
+                nextNSpawner.SpawnNextNCells(gameManager.currentPathIndex);
                 break;
         }
     }

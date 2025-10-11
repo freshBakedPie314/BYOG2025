@@ -12,6 +12,7 @@ public class CharacterStats : MonoBehaviour
 
     public List<Ability> characterAbilities = new List<Ability>();
     public List<StatusEffect> activeStatusEffects = new List<StatusEffect>();
+    public Dictionary<Ability, int> potions = new Dictionary<Ability, int>();
 
     [Header("AI Configuration")]
     public Ability normalAttack;
@@ -27,6 +28,49 @@ public class CharacterStats : MonoBehaviour
     void Awake()
     {
         currentHealth = maxHealth;
+    }
+
+    public void PrintPotionInventory()
+    {
+        Debug.Log("--- Potion Inventory ---");
+
+        if (potions.Count == 0)
+        {
+            Debug.Log("Inventory is empty.");
+        }
+        else
+        {
+            foreach (KeyValuePair<Ability, int> item in potions)
+            {
+                // Print the potion's name and how many the player has.
+                Debug.Log(item.Key.name + ": " + item.Value);
+            }
+        }
+
+        Debug.Log("----------------------");
+    }
+
+    public void AddPotion(Ability potion, int amount)
+    {
+        if (potions.ContainsKey(potion))
+        {
+            potions[potion] += amount; // Add to existing stack
+        }
+        else
+        {
+            potions.Add(potion, amount); // Add new potion type
+        }
+        Debug.Log("Added " + amount + " " + potion.name + ". You now have " + potions[potion] + ".");
+    }
+
+    // Call this to use up a potion.
+    public void UsePotion(Ability potion)
+    {
+        if (potions.ContainsKey(potion) && potions[potion] > 0)
+        {
+            potions[potion]--;
+            Debug.Log("Used " + potion.name + ". " + potions[potion] + " remaining.");
+        }
     }
 
     public void TakeDamage(int damage)
