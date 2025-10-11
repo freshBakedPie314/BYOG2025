@@ -15,7 +15,6 @@ public class BattleManager : MonoBehaviour
     public Transform playerSpawnPoint;
     public Transform enemySpawnPoint;
     public GameObject[] enemyPrefabs;
-
     [Header("Cameras")]
     public CinemachineCamera boardVCam;
     public CinemachineCamera battleVCam;
@@ -50,6 +49,7 @@ public class BattleManager : MonoBehaviour
     private Vector3 playerBoardPosition;
     private Ability currentRewardOnWin;
 
+    public ScreenTransition screenTransition;
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
@@ -58,13 +58,11 @@ public class BattleManager : MonoBehaviour
     // This is for NORMAL enemy battles
     public void StartBattle(AreaType area, Ability rewardOnWin)
     {
+
         currentRewardOnWin = rewardOnWin;
         playerBoardPosition = player.transform.position;
 
-        boardHUD.SetActive(false);
-        board.SetActive(false);
-        battleHUD.SetActive(true);
-        battleArena.SetActive(true);
+        
 
         player.transform.position = playerSpawnPoint.position;
         player.transform.rotation = playerSpawnPoint.rotation;
@@ -82,9 +80,6 @@ public class BattleManager : MonoBehaviour
             case AreaType.Lightning: enemyStats.characterAbilities.Add(lightningAreaAbility); break;
         }
         playerStats = player.GetComponent<CharacterStats>();
-
-        boardVCam.Priority = 5;
-        battleVCam.Priority = 10;
 
         currentState = BattleState.STARTING;
         battleHUDManager.UpdateWarriors();
@@ -130,6 +125,7 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator BattleSequence()
     {
+        screenTransition.StartTransition(true);
         dialogueText.text = "A wild " + currentEnemyInstance.name.Replace("(Clone)", "") + " appears!";
         yield return new WaitForSeconds(2f);
         currentState = BattleState.PLAYERTURN;
@@ -178,6 +174,8 @@ public class BattleManager : MonoBehaviour
                 ability.Execute(playerStats, enemyStats);
             }
         }
+
+        //aniamtion corutine
 
         battleHUDManager.UpdateStats();
         dialogueText.text = "Player uses " + ability.abilityName + "!";
@@ -317,11 +315,9 @@ public class BattleManager : MonoBehaviour
 
     public void EndBattle()
     {
+        screenTransition.StartTransition(false);
         bossRewardAbility = null;
         currentRewardOnWin = null;
-
-        battleVCam.Priority = 5;
-        boardVCam.Priority = 10;
 
         player.transform.position = playerBoardPosition;
         if (currentEnemyInstance != null)

@@ -1,99 +1,167 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
+using Unity.Cinemachine;
+using UnityEngine.Splines.ExtrusionShapes;
+using TMPro;
 
 public class ScreenTransition : MonoBehaviour
 {
-    [Header("Assign the 2 GameObjects to move")]
-    public Transform leftObject;
-    public Transform rightObject;
+    [Header("Assign the 2 UI Objects to move")]
+    public RectTransform leftObject;
+    public RectTransform rightObject;
 
     [Header("Transition Settings")]
-    public float moveDuration = 1f;      // Time to reach the center
-    public float pauseDuration = 1f;     // Time to stay in center
-    public float offset = 8f;            // How far off-screen (world units)
+    public float moveDuration = 1f;
+    public float pauseDuration = 1f;
 
-    private Vector3 leftStartPos;
-    private Vector3 rightStartPos;
-    private Vector3 leftCenterPos;
-    private Vector3 rightCenterPos;
-    private bool isTransitioning = false;
+    [Header("Cameras")]
+    public CinemachineCamera boardVCam;
+    public CinemachineCamera battleVCam;
+
+    private Vector2 leftOffscreenPos;
+    private Vector2 rightOffscreenPos;
+    private Vector2 centerPos;
+
+    public bool isTransitioning = false;
+    public BattleManager battleManager;
+
+    [Header("HUDs & UI")]
+    public GameObject boardHUD;
+    public GameObject battleHUD;
+
+    [Header("Core References")]
+    public GameObject board;
+    public GameObject battleArena;
 
     void Start()
     {
-        // Cache starting positions
-        leftStartPos = leftObject.position;
-        rightStartPos = rightObject.position;
+        centerPos = Vector2.zero;
 
-        // Move them off-screen initially (optional)
-        leftObject.position = new Vector3(-offset, leftStartPos.y, leftStartPos.z);
-        rightObject.position = new Vector3(offset, rightStartPos.y, rightStartPos.z);
+        // ✅ Correct: use canvas width
+        RectTransform canvasRect = leftObject.GetComponentInParent<Canvas>().GetComponent<RectTransform>();
+        float screenWidth = canvasRect.rect.width;
+        float objectWidth = leftObject.rect.width;
 
-        // Compute center positions (center of screen)
-        leftCenterPos = new Vector3(0f, leftStartPos.y, leftStartPos.z);
-        rightCenterPos = new Vector3(0f, rightStartPos.y, rightStartPos.z);
-        InvokeRepeating(nameof(StartTransition), 2f,5f);
+        float offscreenX = (screenWidth / 2f) + (objectWidth / 2f);
+
+        leftOffscreenPos = new Vector2(-offscreenX, centerPos.y);
+        rightOffscreenPos = new Vector2(offscreenX, centerPos.y);
+
+        leftObject.anchoredPosition = leftOffscreenPos;
+        rightObject.anchoredPosition = rightOffscreenPos;
+
+        Debug.Log($"[ScreenTransition] ScreenWidth={screenWidth}, ObjectWidth={objectWidth}, OffscreenX={offscreenX}");
+        Debug.Log($"[ScreenTransition] LeftOffscreen={leftOffscreenPos}, RightOffscreen={rightOffscreenPos}");
     }
 
-    public void StartTransition()
+
+    public void StartTransition(bool toBattle)
     {
+        Debug.Log($"<color=cyan>[ScreenTransition]</color> StartTransition called | ToBattle = {toBattle}, IsTransitioning = {isTransitioning}");
         if (!isTransitioning)
-            StartCoroutine(TransitionRoutine());
+            StartCoroutine(TransitionRoutine(toBattle));
+        else
+            Debug.LogWarning("[ScreenTransition] Transition already in progress!");
     }
 
-    private IEnumerator TransitionRoutine()
+    public IEnumerator TransitionRoutine(bool toBattle)
     {
         isTransitioning = true;
+        Debug.Log("<color=magenta>[ScreenTransition]</color> Transition started...");
 
-        // Move to center
-        yield return MoveObjects(
-            leftObject, rightObject,
-            leftObject.position, rightObject.position,
-            leftCenterPos, rightCenterPos,
-            moveDuration
-        );
+        // 1️ Move objects from off-screen → center
+        Debug.Log("[ScreenTransition] Moving objects ON screen...");
+        yield return StartCoroutine(MoveObjectsIn(leftOffscreenPos, rightOffscreenPos, centerPos, centerPos, moveDuration));
+        Debug.Log("[ScreenTransition] Objects reached center. Screen fully covered.");
 
-        // Wait in center
+        // 2️ Switch cameras
+        if (toBattle)
+        {
+            Debug.Log("[ScreenTransition] Switching to Battle Camera...");
+            boardVCam.Priority = 5;
+            battleVCam.Priority = 10;
+        }
+        else
+        {
+            Debug.Log("[ScreenTransition] Switching to Board Camera...");
+            boardVCam.Priority = 10;
+            battleVCam.Priority = 5;
+        }
+
+        // 3️ Wait while covered
+        Debug.Log($"[ScreenTransition] Pausing for {pauseDuration} seconds...");
         yield return new WaitForSeconds(pauseDuration);
 
-        // Move back to original off-screen positions
-        yield return MoveObjects(
-            leftObject, rightObject,
-            leftCenterPos, rightCenterPos,
-            new Vector3(-offset, leftStartPos.y, leftStartPos.z),
-            new Vector3(offset, rightStartPos.y, rightStartPos.z),
-            moveDuration
-        );
+        boardHUD.SetActive(!toBattle);
+        board.SetActive(!toBattle);
+        battleHUD.SetActive(toBattle);
+        battleArena.SetActive(toBattle);
+
+        // 4️ Move objects from center → off-screen
+        Debug.Log("[ScreenTransition] Moving objects OFF screen...");
+        yield return StartCoroutine(MoveObjectsOut(centerPos, centerPos, leftOffscreenPos, rightOffscreenPos, moveDuration));
+        Debug.Log("<color=lime>[ScreenTransition]</color> Transition complete.");
+
+        
 
         isTransitioning = false;
     }
 
-    // Add this helper method to create an ease-in-out effect
     private float EaseInOut(float t)
     {
         return t * t * (3f - 2f * t);
     }
 
-    private IEnumerator MoveObjects(
-        Transform left, Transform right,
-        Vector3 leftFrom, Vector3 rightFrom,
-        Vector3 leftTo, Vector3 rightTo,
-        float duration
-    )
+    private IEnumerator MoveObjectsIn(Vector2 leftFrom, Vector2 rightFrom, Vector2 leftTo, Vector2 rightTo, float duration)
     {
+        Debug.Log($"[ScreenTransition] MoveObjects | Duration: {duration}s");
+        Debug.Log($"    Left from {leftFrom} → {leftTo}");
+        Debug.Log($"    Right from {rightFrom} → {rightTo}");
+
         float elapsed = 0f;
+
         while (elapsed < duration)
         {
-            float normalizedTime = elapsed / duration;
-            float t = EaseInOut(normalizedTime);
+            float t = EaseInOut(elapsed / duration);
+            leftObject.anchoredPosition = Vector2.Lerp(new Vector2(-1280,0), leftTo, t);
+            rightObject.anchoredPosition = Vector2.Lerp(new Vector2(1280, 0), rightTo, t);
 
-            left.position = Vector3.Lerp(leftFrom, leftTo, t);
-            right.position = Vector3.Lerp(rightFrom, rightTo, t);
+            if (elapsed == 0f || Mathf.Abs(elapsed - duration / 2f) < Time.deltaTime)
+                Debug.Log($"[ScreenTransition] Progress t={t:F2}, LeftPos={leftObject.anchoredPosition}, RightPos={rightObject.anchoredPosition}");
 
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        left.position = leftTo;
-        right.position = rightTo;
+        leftObject.anchoredPosition = leftTo;
+        rightObject.anchoredPosition = rightTo;
+
+        Debug.Log($"[ScreenTransition] Move complete | Left={leftTo}, Right={rightTo}");
+    }
+    private IEnumerator MoveObjectsOut(Vector2 leftFrom, Vector2 rightFrom, Vector2 leftTo, Vector2 rightTo, float duration)
+    {
+        Debug.Log($"[ScreenTransition] MoveObjects | Duration: {duration}s");
+        Debug.Log($"    Left from {leftFrom} → {leftTo}");
+        Debug.Log($"    Right from {rightFrom} → {rightTo}");
+
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float t = EaseInOut(elapsed / duration);
+            leftObject.anchoredPosition = Vector2.Lerp(leftFrom, new Vector2(-1280, 0), t);
+            rightObject.anchoredPosition = Vector2.Lerp(rightFrom, new Vector2(1280, 0), t);
+
+            if (elapsed == 0f || Mathf.Abs(elapsed - duration / 2f) < Time.deltaTime)
+                Debug.Log($"[ScreenTransition] Progress t={t:F2}, LeftPos={leftObject.anchoredPosition}, RightPos={rightObject.anchoredPosition}");
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        leftObject.anchoredPosition = new Vector2(-1280, 0);
+        rightObject.anchoredPosition = new Vector2(1280, 0);
+
+        Debug.Log($"[ScreenTransition] Move complete | Left={leftTo}, Right={rightTo}");
     }
 }
