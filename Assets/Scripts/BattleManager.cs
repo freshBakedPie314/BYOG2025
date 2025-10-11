@@ -399,8 +399,9 @@ public class BattleManager : MonoBehaviour
 
             dialogueText.text = actionText;
             yield return new WaitForSeconds(2f);
-            isAttackInProgress = false;
         }
+
+        isAttackInProgress = false;
 
         battleHUDManager.UpdateStats();
         if (playerStats.currentHealth <= 0)
