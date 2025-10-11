@@ -1,9 +1,8 @@
 using UnityEngine;
-using UnityEngine.UI; // Required for UI elements like Text
+using UnityEngine.UI;
 using System.Collections;
-using Unity.Cinemachine; // You might see an error if Cinemachine isn't imported
+using Unity.Cinemachine;
 using TMPro;
-using Unity.VisualScripting;
 
 public class BattleManager : MonoBehaviour
 {
@@ -40,6 +39,7 @@ public class BattleManager : MonoBehaviour
     [Header("Boss Fight")]
     [Tooltip("Ability to be awarded after boss fight")]
     public Ability bossRewardAbility;
+
     public enum BattleState { INACTIVE, STARTING, PLAYERTURN, ENEMYTURN, WON, LOST }
     public enum AreaType { None, Fire, Snow, Earth, Lightning }
     public BattleState currentState;
@@ -47,16 +47,18 @@ public class BattleManager : MonoBehaviour
     private GameObject currentEnemyInstance;
     private CharacterStats playerStats;
     private CharacterStats enemyStats;
-    private Vector3 playerBoardPosition; // To remember where the player was
+    private Vector3 playerBoardPosition;
     private Ability currentRewardOnWin;
+
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
     }
 
+    // This is for NORMAL enemy battles
     public void StartBattle(AreaType area, Ability rewardOnWin)
     {
-        currentRewardOnWin = rewardOnWin; // Store the reward
+        currentRewardOnWin = rewardOnWin;
         playerBoardPosition = player.transform.position;
 
         boardHUD.SetActive(false);
@@ -74,19 +76,47 @@ public class BattleManager : MonoBehaviour
 
         switch (area)
         {
-            case AreaType.Fire:
-                enemyStats.characterAbilities.Add(fireAreaAbility);
-                break;
-            case AreaType.Snow:
-                enemyStats.characterAbilities.Add(snowAreaAbility);
-                break;
-            case AreaType.Earth:
-                enemyStats.characterAbilities.Add(earthAreaAbility);
-                break;
-            case AreaType.Lightning:
-                enemyStats.characterAbilities.Add(lightningAreaAbility);
-                break;
+            case AreaType.Fire: enemyStats.characterAbilities.Add(fireAreaAbility); break;
+            case AreaType.Snow: enemyStats.characterAbilities.Add(snowAreaAbility); break;
+            case AreaType.Earth: enemyStats.characterAbilities.Add(earthAreaAbility); break;
+            case AreaType.Lightning: enemyStats.characterAbilities.Add(lightningAreaAbility); break;
         }
+        playerStats = player.GetComponent<CharacterStats>();
+
+        boardVCam.Priority = 5;
+        battleVCam.Priority = 10;
+
+        currentState = BattleState.STARTING;
+        battleHUDManager.UpdateWarriors();
+        battleHUDManager.UpdateStats();
+        StartCoroutine(BattleSequence());
+    }
+
+    // This is for BOSS battles
+    public void StartBossBattle(GameObject bossPrefab, Ability skillToLearn)
+    {
+        bossRewardAbility = skillToLearn;
+        playerBoardPosition = player.transform.position;
+
+        boardHUD.SetActive(false);
+        board.SetActive(false);
+        battleHUD.SetActive(true);
+        battleArena.SetActive(true);
+
+        player.transform.position = playerSpawnPoint.position;
+        player.transform.rotation = playerSpawnPoint.rotation;
+
+        currentEnemyInstance = Instantiate(bossPrefab, enemySpawnPoint.position, enemySpawnPoint.rotation);
+        enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
+
+        enemyStats.maxHealth = 200;
+        enemyStats.currentHealth = 200;
+        enemyStats.attackPower = 20;
+        enemyStats.defense = 10;
+
+        enemyStats.characterAbilities.Clear();
+        enemyStats.characterAbilities.Add(skillToLearn);
+
         playerStats = player.GetComponent<CharacterStats>();
 
         boardVCam.Priority = 5;
@@ -100,41 +130,56 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator BattleSequence()
     {
-        dialogueText.text = "A wild " + enemyStats.name.Replace("(Clone)", "") + " appears!";
+        dialogueText.text = "A wild " + currentEnemyInstance.name.Replace("(Clone)", "") + " appears!";
         yield return new WaitForSeconds(2f);
-
         currentState = BattleState.PLAYERTURN;
         PlayerTurn();
     }
 
     void PlayerTurn()
     {
-        playerStats.PrintPotionInventory();
-
         dialogueText.text = "Player's Turn. Choose your move.";
-
-        //TODO: Unlock player attack one by one 
+        battleHUDManager.UpdateActionButtons(playerStats);
+        playerStats.PrintPotionInventory();
     }
 
     public void OnAbilityButton(Ability ability)
     {
         if (currentState != BattleState.PLAYERTURN)
             return;
-
         StartCoroutine(PlayerAction(ability));
     }
 
     IEnumerator PlayerAction(Ability ability)
     {
-        if (ability.targetType == Ability.TargetType.Self)
+        bool isPotion = playerStats.potions.ContainsKey(ability);
+        if (isPotion)
         {
-            ability.Execute(playerStats, playerStats);
+            if (playerStats.potions[ability] > 0)
+            {
+                ability.Execute(playerStats, playerStats);
+                playerStats.UsePotion(ability);
+            }
+            else
+            {
+                dialogueText.text = "You don't have any " + ability.name + " left!";
+                yield return new WaitForSeconds(2f);
+                yield break;
+            }
         }
         else
         {
-            ability.Execute(playerStats, enemyStats);
+            if (ability.targetType == Ability.TargetType.Self)
+            {
+                ability.Execute(playerStats, playerStats);
+            }
+            else
+            {
+                ability.Execute(playerStats, enemyStats);
+            }
         }
 
+        battleHUDManager.UpdateStats();
         dialogueText.text = "Player uses " + ability.abilityName + "!";
         yield return new WaitForSeconds(2f);
 
@@ -152,24 +197,20 @@ public class BattleManager : MonoBehaviour
 
     void ProcessStatusEffects(CharacterStats character)
     {
+        if (character == null) return;
         for (int i = character.activeStatusEffects.Count - 1; i >= 0; i--)
         {
             StatusEffect effect = character.activeStatusEffects[i];
-
             effect.OnTurnTick(character);
-
             if (effect.duration <= 0)
             {
                 effect.OnRemove(character);
-
                 character.activeStatusEffects.RemoveAt(i);
             }
         }
         battleHUDManager.UpdateStats();
     }
 
-    //-------------ENEMY AI-------------//
-    //TODO: Update AI
     IEnumerator EnemyTurn()
     {
         dialogueText.text = "Enemy's Turn.";
@@ -226,6 +267,7 @@ public class BattleManager : MonoBehaviour
             yield return new WaitForSeconds(2f);
         }
 
+        battleHUDManager.UpdateStats();
         if (playerStats.currentHealth <= 0)
         {
             currentState = BattleState.LOST;
@@ -253,19 +295,15 @@ public class BattleManager : MonoBehaviour
         if (currentState == BattleState.WON)
         {
             dialogueText.text = "You won the battle!";
-
-            // First, check for a special boss reward
             if (bossRewardAbility != null && !playerStats.characterAbilities.Contains(bossRewardAbility))
             {
                 playerStats.characterAbilities.Add(bossRewardAbility);
                 dialogueText.text += "\nYou learned " + bossRewardAbility.abilityName + "!";
             }
-            // If it wasn't a boss fight, check for a regular potion reward
             else if (currentRewardOnWin != null)
             {
                 playerStats.AddPotion(currentRewardOnWin, 1);
                 dialogueText.text += "\nYou received a " + currentRewardOnWin.name + "!";
-                playerStats.PrintPotionInventory();
             }
         }
         else if (currentState == BattleState.LOST)
@@ -274,16 +312,18 @@ public class BattleManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(3f);
-
         EndBattle();
     }
 
     public void EndBattle()
     {
+        bossRewardAbility = null;
+        currentRewardOnWin = null;
+
         battleVCam.Priority = 5;
         boardVCam.Priority = 10;
-        player.transform.position = playerBoardPosition;
 
+        player.transform.position = playerBoardPosition;
         if (currentEnemyInstance != null)
         {
             Destroy(currentEnemyInstance);
