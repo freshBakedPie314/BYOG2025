@@ -76,6 +76,10 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(AnimateAndMove());
         }
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            currentPathIndex = currentPath.Length - 2;
+        }
     }
 
     public void SetPlayerColor(PlayerColor color)
@@ -159,6 +163,11 @@ public class PlayerController : MonoBehaviour
             BoardCell landedCell = hit.collider.GetComponent<BoardCell>();
             if (landedCell != null)
             {
+                if (currentPathIndex == currentPath.Length - 1)
+                {
+                    battleManager.StartUltimateBattle();
+                    return;
+                }
                 ProcessCellAction(landedCell);
             }
         }

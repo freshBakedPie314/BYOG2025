@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e59837c1609ae114f8bceacf01a9ccc3, type: 3}
   m_Name: Weaken
   m_EditorClassIdentifier: 
-  abilityName: Burn
+  abilityName: Frost
   power: 2
   targetType: 0
   effectType: 3

@@ -57,6 +57,9 @@ public class BattleManager : MonoBehaviour
     private Ability currentRewardOnWin;
 
     public ScreenTransition screenTransition;
+    public GameObject ultimateBossPrefab;
+    public Ability slashAttack;
+    public Ability healAbility;
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
@@ -411,5 +414,48 @@ public class BattleManager : MonoBehaviour
     public GameObject GetCurrentEnemyInstance()
     {
         return currentEnemyInstance;
+    }
+
+    public void StartUltimateBattle()
+    {
+        playerBoardPosition = player.transform.position;
+
+        boardHUD.SetActive(false);
+        board.SetActive(false);
+        battleHUD.SetActive(true);
+        battleArena.SetActive(true);
+
+        player.transform.position = playerSpawnPoint.position;
+        player.transform.rotation = playerSpawnPoint.rotation;
+
+        Quaternion rot = Quaternion.Euler(enemySpawnPoint.rotation.x, enemySpawnPoint.rotation.y, enemySpawnPoint.rotation.z);
+
+        currentEnemyInstance = Instantiate(ultimateBossPrefab, enemySpawnPoint.position, rot);
+        enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
+
+        enemyStats.maxHealth = 6969;
+        enemyStats.currentHealth = 6969;
+        enemyStats.attackPower = 69;
+        enemyStats.defense = 69;
+
+        enemyStats.characterAbilities.Clear();
+        enemyStats.characterAbilities.Add(fireAreaAbility);
+        enemyStats.characterAbilities.Add(snowAreaAbility);
+        enemyStats.characterAbilities.Add(earthAreaAbility);
+        enemyStats.characterAbilities.Add(lightningAreaAbility);
+
+        enemyStats.normalAttack = slashAttack;
+        enemyStats.healAtHealthPercent = 20;
+        enemyStats.healingAbility = healAbility;
+
+        playerStats = player.GetComponent<CharacterStats>();
+
+        boardVCam.Priority = 5;
+        battleVCam.Priority = 10;
+
+        currentState = BattleState.STARTING;
+        battleHUDManager.UpdateWarriors();
+        battleHUDManager.UpdateStats();
+        StartCoroutine(BattleSequence());
     }
 }

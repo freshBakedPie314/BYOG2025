@@ -437,6 +437,9 @@ MonoBehaviour:
   bossRewardAbility: {fileID: 0}
   currentState: 0
   screenTransition: {fileID: 1044215981}
+  ultimateBossPrefab: {fileID: 1202224435539259145, guid: 6acf2ef314d44cc419745e3d566b2ee3, type: 3}
+  slashAttack: {fileID: 11400000, guid: 13b69619b9f1b0748bcd8540a7d217e5, type: 2}
+  healAbility: {fileID: 11400000, guid: 396703d153980764da90266fc2c65bfa, type: 2}
 --- !u!1 &170748321
 GameObject:
   m_ObjectHideFlags: 0
