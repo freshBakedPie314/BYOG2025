@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using Unity.Cinemachine;
 using TMPro;
+using UnityEditor.Playables;
 
 public class BattleManager : MonoBehaviour
 {
@@ -40,7 +41,15 @@ public class BattleManager : MonoBehaviour
     public GameObject slashVFXice;
     public GameObject slashVFXearth;
     public GameObject slashVFXthunder;
-
+    public GameObject blockVFX;
+    public GameObject burnVFX;
+    public GameObject stunVFX;
+    public GameObject frostVFX;
+    public GameObject quakeVFX;
+    public GameObject healVFX;
+    public GameObject dmgVFX;
+    public GameObject defVFX;
+    public GameObject impactVFX;
 
     [Header("Boss Fight")]
     [Tooltip("Ability to be awarded after boss fight")]
@@ -189,7 +198,59 @@ public class BattleManager : MonoBehaviour
         }
 
         //aniamtion corutine
-        yield return MoveForwardRoutine();
+        if(ability.abilityName == "Slash")
+        {
+            yield return MoveForwardRoutine(1);
+            
+        }
+        else if(ability.abilityName == "Block")
+        {
+            GameObject blockfx = Instantiate(blockVFX, player.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
+        else if (ability.abilityName == "Damge Inc")
+        {
+            GameObject blockfx = Instantiate(dmgVFX, player.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
+        else if (ability.abilityName == "Defense Inc")
+        {
+            GameObject blockfx = Instantiate(defVFX, player.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
+        else if (ability.abilityName == "Heal")
+        {
+            GameObject blockfx = Instantiate(healVFX, player.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
+        else if (ability.abilityName == "Burn")
+        {
+            GameObject blockfx = Instantiate(burnVFX, enemyStats.gameObject.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
+        else if (ability.abilityName == "Stun")
+        {
+            GameObject blockfx = Instantiate(stunVFX, enemyStats.gameObject.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
+        else if (ability.abilityName == "Quake")
+        {
+            GameObject blockfx = Instantiate(quakeVFX, enemyStats.gameObject.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
+        else if (ability.abilityName == "Frost")
+        {
+            GameObject blockfx = Instantiate(frostVFX, enemyStats.gameObject.transform);
+            yield return new WaitForSeconds(2.5f);
+            Destroy(blockfx);
+        }
 
         battleHUDManager.UpdateStats();
         dialogueText.text = "Player uses " + ability.abilityName + "!";
@@ -249,6 +310,9 @@ public class BattleManager : MonoBehaviour
             {
                 abilityToUse = enemyStats.healingAbility;
                 actionText = "Enemy heals itself!";
+                GameObject blockfx = Instantiate(healVFX, enemyStats.gameObject.transform);
+                yield return new WaitForSeconds(1.5f);
+                Destroy(blockfx);
                 abilityToUse.Execute(enemyStats, enemyStats); // Target is self for healing
             }
             // --- END OF MODIFIED LOGIC ---
@@ -267,6 +331,61 @@ public class BattleManager : MonoBehaviour
                 if (abilityToUse != null)
                 {
                     actionText = "Enemy uses " + abilityToUse.abilityName + "!";
+                    if (abilityToUse.abilityName == "Slash")
+                    {
+                        yield return MoveForwardRoutine(-1);
+                        GameObject impact = Instantiate(impactVFX, enemyStats.gameObject.transform);
+                        yield return new WaitForSeconds(0.5f);
+                        Destroy(impact);
+                    }
+                    else if (abilityToUse.abilityName == "Block")
+                    {
+                        GameObject blockfx = Instantiate(blockVFX, enemyStats.gameObject.transform);
+                        yield return new WaitForSeconds(6f);
+                        Destroy(blockfx);
+                    }
+                    else if (abilityToUse.abilityName == "Damge Inc")
+                    {
+                        GameObject blockfx = Instantiate(dmgVFX, enemyStats.gameObject.transform);
+                        yield return new WaitForSeconds(2.5f);
+                        Destroy(blockfx);
+                    }
+                    else if (abilityToUse.abilityName == "Defense Inc")
+                    {
+                        GameObject blockfx = Instantiate(defVFX, enemyStats.gameObject.transform);
+                        yield return new WaitForSeconds(2.5f);
+                        Destroy(blockfx);
+                    }
+                    else if (abilityToUse.abilityName == "Heal")
+                    {
+                        GameObject blockfx = Instantiate(healVFX, enemyStats.gameObject.transform);
+                        yield return new WaitForSeconds(2.5f);
+                        Destroy(blockfx);
+                    }
+                    else if (abilityToUse.abilityName == "Burn")
+                    {
+                        GameObject blockfx = Instantiate(burnVFX, player.transform);
+                        yield return new WaitForSeconds(2.5f);
+                        Destroy(blockfx);
+                    }
+                    else if (abilityToUse.abilityName == "Stun")
+                    {
+                        GameObject blockfx = Instantiate(stunVFX, player.transform);
+                        yield return new WaitForSeconds(2.5f);
+                        Destroy(blockfx);
+                    }
+                    else if (abilityToUse.abilityName == "Quake")
+                    {
+                        GameObject blockfx = Instantiate(quakeVFX, player.transform);
+                        yield return new WaitForSeconds(2.5f);
+                        Destroy(blockfx);
+                    }
+                    else if (abilityToUse.abilityName == "Frost")
+                    {
+                        GameObject blockfx = Instantiate(frostVFX, player.transform);
+                        yield return new WaitForSeconds(2.5f);
+                        Destroy(blockfx);
+                    }
                     abilityToUse.Execute(enemyStats, playerStats);
                 }
                 else
@@ -302,68 +421,95 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    IEnumerator SpawnSlashVFX()
+    IEnumerator SpawnSlashVFX(int direction,Transform pawn,Transform opp)
     {
         PlayerController.PlayerColor color = player.GetComponent<PlayerController>().startArea;
-        Vector3 spAngle = new Vector3(0, 90, 90);
+        if(pawn.transform != player.transform)
+        {
+            color = player.GetComponentInParent<PlayerController>().currentArea;
+        }
+        Vector3 spAngle = new Vector3(0, direction*90, 90);
         switch (color)
         {
             case PlayerController.PlayerColor.Red:
-                GameObject VFXred = Instantiate(slashVFXfire, player.transform.position,Quaternion.Euler(spAngle));
-                yield return new WaitForSeconds(2f);
+                GameObject VFXred = Instantiate(slashVFXfire, pawn.position,Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(0.1f);
+                GameObject impact = Instantiate(impactVFX, opp);
+                yield return new WaitForSeconds(0.5f);
+                Destroy(impact);
                 Destroy(VFXred);
                 break;
             case PlayerController.PlayerColor.Blue:
-                GameObject VFXblue = Instantiate(slashVFXice, player.transform.position, Quaternion.Euler(spAngle));
-                yield return new WaitForSeconds(2f);
+                GameObject VFXblue = Instantiate(slashVFXice, pawn.position, Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(0.1f);
+                GameObject impact1 = Instantiate(impactVFX, opp);
+                yield return new WaitForSeconds(0.5f);
+                Destroy(impact1);
                 Destroy(VFXblue);
                 break;
             case PlayerController.PlayerColor.Green:
-                GameObject VFXgreen = Instantiate(slashVFXearth, player.transform.position, Quaternion.Euler(spAngle));
-                yield return new WaitForSeconds(2f);
+                GameObject VFXgreen = Instantiate(slashVFXearth, pawn.position, Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(0.1f);
+                GameObject impact2 = Instantiate(impactVFX, opp);
+                yield return new WaitForSeconds(0.5f);
+                Destroy(impact2);
                 Destroy(VFXgreen);
                 break;
             default:
-                GameObject VFXyellow = Instantiate(slashVFXthunder, player.transform.position, Quaternion.Euler(spAngle));
-                yield return new WaitForSeconds(2f);
+                GameObject VFXyellow = Instantiate(slashVFXthunder, pawn.position, Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(0.1f);
+                GameObject impact3 = Instantiate(impactVFX, opp);
+                yield return new WaitForSeconds(0.5f);
+                Destroy(impact3);
                 Destroy(VFXyellow);
                 break;
         }
         
     }
 
-    private IEnumerator MoveForwardRoutine()
+    private IEnumerator MoveForwardRoutine(int direction)
     {
-        float moveDistance = 2f;   // How far to move forward
-        float moveDuration = 1f;   // How long to take to move forward/back
-           // How long to wait before returning
-
-        Vector3 startPos = player.transform.position;
-        Vector3 endPos = startPos + player.transform.right * moveDistance;
+        float moveDistance = 4f;   // How far to move forward
+        float moveDuration = 0.5f;   // How long to take to move forward/back
+                                     // How long to wait before returning
+        Transform pawn = player.transform;
+        Transform opp = enemyStats.gameObject.transform;
+        if(direction == 1)
+        {
+            pawn = player.transform;
+            opp = enemyStats.gameObject.transform;
+        }
+        else if(direction == -1)
+        {
+            pawn = enemyStats.gameObject.transform;
+            opp = player.transform;
+        }
+        Vector3 startPos = pawn.transform.position;
+        Vector3 endPos = startPos + pawn.transform.right*direction * moveDistance;
 
         // 1️⃣ Move forward
-        yield return MoveBetween(startPos, endPos, moveDuration);
+        yield return MoveBetween(pawn,startPos, endPos, moveDuration);
 
         // 2️⃣ Wait at the new position
-        yield return SpawnSlashVFX();
+        yield return SpawnSlashVFX(direction,pawn,opp);
 
         // 3️⃣ Move back
-        yield return MoveBetween(endPos, startPos, moveDuration);
+        yield return MoveBetween(pawn, endPos, startPos, moveDuration);
     }
 
-    private IEnumerator MoveBetween(Vector3 from, Vector3 to, float duration)
+    private IEnumerator MoveBetween(Transform pawn,Vector3 from, Vector3 to, float duration)
     {
         float elapsed = 0f;
         while (elapsed < duration)
         {
             float t = elapsed / duration;
             t = t * t * (3f - 2f * t); // smoothstep ease
-            player.transform.position = Vector3.Lerp(from, to, t);
+            pawn.position = Vector3.Lerp(from, to, t);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        player.transform.position = to;
+        pawn.position = to;
     }
     IEnumerator EndBattleSequence()
     {
