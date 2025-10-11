@@ -430,9 +430,13 @@ MonoBehaviour:
   snowAreaAbility: {fileID: 11400000, guid: 90c3b133bc2c45b4d98ddc43128078b4, type: 2}
   earthAreaAbility: {fileID: 11400000, guid: 165b04c0a0e741d46a47f035935eac2f, type: 2}
   lightningAreaAbility: {fileID: 11400000, guid: 5d7051cb52f4c704ea9bef1c5c7186a8, type: 2}
+  slashVFXfire: {fileID: 8145502431507700120, guid: 000832214335ffd4782827d2a4510f4a, type: 3}
+  slashVFXice: {fileID: 2060900179291159282, guid: ca6705a3f9070d14d819d179493bcfa0, type: 3}
+  slashVFXearth: {fileID: 3153472991145048103, guid: 3407e378c048bb5438424b28c7740b48, type: 3}
+  slashVFXthunder: {fileID: 1171201465392465800, guid: 4aa9f30a28a77224ba84b2a2c334c71b, type: 3}
   bossRewardAbility: {fileID: 0}
   currentState: 0
-  screenTransition: {fileID: 330585549}
+  screenTransition: {fileID: 1044215981}
 --- !u!1 &170748321
 GameObject:
   m_ObjectHideFlags: 0
@@ -1696,7 +1700,6 @@ GameObject:
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
-  - component: {fileID: 330585549}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1854,25 +1857,6 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
---- !u!114 &330585549
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330585543}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33867b7172dac484a94f0494407c115a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leftObject: {fileID: 1745759782}
-  rightObject: {fileID: 2101014336}
-  moveDuration: 1
-  pauseDuration: 1
-  boardVCam: {fileID: 1672898628}
-  battleVCam: {fileID: 966426951}
-  isTransitioning: 0
 --- !u!1 &350220783
 GameObject:
   m_ObjectHideFlags: 0
@@ -4821,6 +4805,11 @@ MonoBehaviour:
   boardVCam: {fileID: 1672898628}
   battleVCam: {fileID: 966426951}
   isTransitioning: 0
+  battleManager: {fileID: 157236912}
+  boardHUD: {fileID: 1256887775}
+  battleHUD: {fileID: 1407220240}
+  board: {fileID: 240465139}
+  battleArena: {fileID: 1728257839}
 --- !u!1 &1084547727
 GameObject:
   m_ObjectHideFlags: 0

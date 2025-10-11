@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using Unity.Cinemachine;
@@ -34,6 +34,13 @@ public class BattleManager : MonoBehaviour
     public Ability snowAreaAbility;
     public Ability earthAreaAbility;
     public Ability lightningAreaAbility;
+
+    [Header("VFX")]
+    public GameObject slashVFXfire;
+    public GameObject slashVFXice;
+    public GameObject slashVFXearth;
+    public GameObject slashVFXthunder;
+
 
     [Header("Boss Fight")]
     [Tooltip("Ability to be awarded after boss fight")]
@@ -176,6 +183,7 @@ public class BattleManager : MonoBehaviour
         }
 
         //aniamtion corutine
+        yield return MoveForwardRoutine();
 
         battleHUDManager.UpdateStats();
         dialogueText.text = "Player uses " + ability.abilityName + "!";
@@ -288,6 +296,69 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    IEnumerator SpawnSlashVFX()
+    {
+        PlayerController.PlayerColor color = player.GetComponent<PlayerController>().startArea;
+        Vector3 spAngle = new Vector3(0, 90, 90);
+        switch (color)
+        {
+            case PlayerController.PlayerColor.Red:
+                GameObject VFXred = Instantiate(slashVFXfire, player.transform.position,Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(2f);
+                Destroy(VFXred);
+                break;
+            case PlayerController.PlayerColor.Blue:
+                GameObject VFXblue = Instantiate(slashVFXice, player.transform.position, Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(2f);
+                Destroy(VFXblue);
+                break;
+            case PlayerController.PlayerColor.Green:
+                GameObject VFXgreen = Instantiate(slashVFXearth, player.transform.position, Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(2f);
+                Destroy(VFXgreen);
+                break;
+            default:
+                GameObject VFXyellow = Instantiate(slashVFXthunder, player.transform.position, Quaternion.Euler(spAngle));
+                yield return new WaitForSeconds(2f);
+                Destroy(VFXyellow);
+                break;
+        }
+        
+    }
+
+    private IEnumerator MoveForwardRoutine()
+    {
+        float moveDistance = 2f;   // How far to move forward
+        float moveDuration = 1f;   // How long to take to move forward/back
+           // How long to wait before returning
+
+        Vector3 startPos = player.transform.position;
+        Vector3 endPos = startPos + player.transform.right * moveDistance;
+
+        // 1️⃣ Move forward
+        yield return MoveBetween(startPos, endPos, moveDuration);
+
+        // 2️⃣ Wait at the new position
+        yield return SpawnSlashVFX();
+
+        // 3️⃣ Move back
+        yield return MoveBetween(endPos, startPos, moveDuration);
+    }
+
+    private IEnumerator MoveBetween(Vector3 from, Vector3 to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            t = t * t * (3f - 2f * t); // smoothstep ease
+            player.transform.position = Vector3.Lerp(from, to, t);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        player.transform.position = to;
+    }
     IEnumerator EndBattleSequence()
     {
         if (currentState == BattleState.WON)
