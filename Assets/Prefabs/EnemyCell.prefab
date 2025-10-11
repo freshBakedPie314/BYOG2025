@@ -122,10 +122,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f9d7a59b91dfce428d7c0f15432a66a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  potionSprites:
+  - {fileID: 1360961099, guid: 72fdeded3ded882499e040940ec3df18, type: 3}
+  - {fileID: 1279184632, guid: 72fdeded3ded882499e040940ec3df18, type: 3}
+  - {fileID: -840863614, guid: 72fdeded3ded882499e040940ec3df18, type: 3}
   buffSprites:
   - {fileID: 1875290467, guid: 72fdeded3ded882499e040940ec3df18, type: 3}
   - {fileID: -254537681, guid: 72fdeded3ded882499e040940ec3df18, type: 3}
   - {fileID: -1036847094, guid: 72fdeded3ded882499e040940ec3df18, type: 3}
+  buffOrder:
+  - Damage Inc
+  - Defense Inc
+  - Heal
 --- !u!1 &7651798749851413866
 GameObject:
   m_ObjectHideFlags: 0

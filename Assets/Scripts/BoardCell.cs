@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum CellType { Ally, Enemy }
@@ -19,6 +19,8 @@ public class BoardCell : MonoBehaviour
     private CellData cellData;
     private float omega;
     private float t; //animation parameter
+    private float anim_omega;
+    private readonly float anim_amplitude = 0.3f;
     Vector3 initPosition;
 
     public void Initialize(CellData data)
@@ -26,15 +28,18 @@ public class BoardCell : MonoBehaviour
         this.cellData = data;
         DisplayReward();
         transform.localRotation = Quaternion.Euler(0, Random.Range(0f, 10f), 0);
-        omega = Random.Range(0.1f, 0.3f);
+        omega = 50 * Random.Range(0.9f, 1.5f);
         t = Random.Range(0, Mathf.PI);
         initPosition = transform.position;
+        anim_omega = Random.Range(0.9f, 1.5f);
     }
 
     void Update()
     {
-        transform.rotation *= Quaternion.Euler(0, omega, 0);
-        transform.position = initPosition + 0.3*Math.Sin(t)
+        transform.rotation *= Quaternion.Euler(0, omega * Time.deltaTime, 0);
+        transform.position = initPosition + anim_amplitude * Mathf.Sin(anim_omega*t) * Vector3.up;
+
+        t += Time.deltaTime;
     }
 
     public CellData GetData()
@@ -42,8 +47,9 @@ public class BoardCell : MonoBehaviour
         return cellData;
     }
 
-    public Dictionary<string, Sprite> potionSprites;
+    public Sprite[] potionSprites;
     public Sprite[] buffSprites;
+    List<string> buffOrder = new List<string> { "DamageInc Potion", "DefenseInc Potion", "Heal Potion" };
 
     void DisplayReward()
     {
@@ -55,6 +61,13 @@ public class BoardCell : MonoBehaviour
         }
         else if (cellData.type == CellType.Enemy)
         {
+            foreach(var t in  buffOrder)
+            {
+                print(t);
+            }
+            int id = buffOrder.IndexOf(cellData.potionReward.name);
+            print(cellData.potionReward.name + " " + id.ToString() + " " + buffOrder.ToArray().ToString());
+            transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = potionSprites[id];
             // TODO: Show an icon for the specific potion reward.
             Debug.Log("Spawning Enemy Cell with reward: " + cellData.potionReward.name);
             //transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = potionSprites[cellData.potionReward.name];
