@@ -40,6 +40,16 @@ public class PlayerController : MonoBehaviour
 
     [Header("UI")]
     public GameObject chohiceMenu;
+    public TextMeshProUGUI rewardDescription;
+    public Image rewardImage;
+
+    public Sprite healImage;
+    public Sprite dmgImage;
+    public Sprite defImage;
+
+    public string healDesc;
+    public string dmgDesc;
+    public string defDesc;
 
     public bool canMove = true;
     public enum PlayerColor { Red, Green, Yellow, Blue } // Order matters for indexing
@@ -195,7 +205,7 @@ public class PlayerController : MonoBehaviour
             // default: return AreaType.None;
             case CellType.Enemy:
                 currentLandedCell = cell;
-                ShowChoiceMenu();
+                ShowChoiceMenu(landedCellData.potionReward.abilityName);
                 break;
             case CellType.Ally:
                 switch (landedCellData.buffType)
@@ -219,8 +229,24 @@ public class PlayerController : MonoBehaviour
         return (PlayerColor)currentAreaID;
     }
 
-    public void ShowChoiceMenu()
+    public void ShowChoiceMenu(string reward)
     {
+        if(reward == "Heal")
+        {
+            rewardImage.sprite = healImage;
+            rewardDescription.text = healDesc;
+        }
+        else if(reward == "Damge Inc")
+        {
+            rewardImage.sprite = dmgImage;
+            rewardDescription.text = dmgDesc;
+        }
+        else if(reward == "Defense Inc")
+        {
+            rewardImage.sprite = defImage;
+            rewardDescription.text = defDesc;
+        }
+        
         chohiceMenu.SetActive(true);
         canMove = false;
     }
@@ -367,9 +393,6 @@ public class PlayerController : MonoBehaviour
         List<Vector3> worldPath = new List<Vector3>();
         foreach (var point in fullPathGrid)
         {
-            // --- MODIFIED ---
-            // Inverted the coordinates to account for a 180-degree board rotation.
-            // This effectively calculates the world position for (14-x, 14-y) instead of (x,y).
             worldPath.Add(new Vector3(7f - point.x, 0.1f, 7f - point.y));
         }
 

@@ -7,7 +7,9 @@ public class BattleHUDManager : MonoBehaviour
 {
     [Header("Health Displays")]
     public TextMeshProUGUI playerHealthText;
+    public Slider playerHealthSlider;
     public TextMeshProUGUI enemyHealthText;
+    public Slider enemyHealthSlider;
 
     [Header("Action Buttons")]
     [Tooltip("Drag all of your action buttons (Stun, Heal, etc.) here.")]
@@ -43,8 +45,16 @@ public class BattleHUDManager : MonoBehaviour
     public void UpdateStats()
     {
         if (player != null)
+        {
             playerHealthText.text = player.GetComponent<CharacterStats>().currentHealth.ToString();
+            playerHealthSlider.maxValue = player.GetComponent<CharacterStats>().maxHealth;
+            playerHealthSlider.value = player.GetComponent<CharacterStats>().currentHealth;
+        }
         if (enemy != null)
+        {
             enemyHealthText.text = enemy.GetComponent<CharacterStats>().currentHealth.ToString();
+            enemyHealthSlider.maxValue = enemy.GetComponent<CharacterStats>().maxHealth;
+            enemyHealthSlider.value = enemy.GetComponent<CharacterStats>().currentHealth;
+        }
     }
 }

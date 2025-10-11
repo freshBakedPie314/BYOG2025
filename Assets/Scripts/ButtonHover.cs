@@ -5,9 +5,13 @@ using UnityEngine.EventSystems;
 public class HoverMoveStable : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler
 {
     [Header("Movement Settings")]
-    public float moveUpAmount = 10f;   // How much to move up (in UI units)
-    public float smoothTime = 0.08f;   // Smaller = snappier motion
+    public float moveUpAmount = 10f;
+    public float smoothTime = 0.08f;
     public bool useSmoothDamp = true;
+
+    [Header("Tooltip Settings")]
+    [TextArea(3, 10)]
+    public string tooltipText;
 
     private RectTransform rt;
     private Vector3 originalLocalPos;
@@ -15,9 +19,6 @@ public class HoverMoveStable : MonoBehaviour, IPointerEnterHandler, IPointerExit
     private Vector3 velocity = Vector3.zero;
     private bool isHovered = false;
 
-    // Screen-space hover region captured at Start (based on resting position)
-    private float originalTopY;
-    private float originalBottomY;
     private float originalCenterY;
 
     void Awake()
@@ -29,7 +30,6 @@ public class HoverMoveStable : MonoBehaviour, IPointerEnterHandler, IPointerExit
     {
         originalLocalPos = rt.localPosition;
         targetLocalPos = originalLocalPos;
-
         CaptureOriginalScreenRect();
     }
 
@@ -41,45 +41,37 @@ public class HoverMoveStable : MonoBehaviour, IPointerEnterHandler, IPointerExit
             rt.localPosition = Vector3.Lerp(rt.localPosition, targetLocalPos, Time.deltaTime * (1f / Mathf.Max(smoothTime, 0.0001f)));
     }
 
-    // Capture the resting rect in screen space once, so movement won't affect the hover test
     private void CaptureOriginalScreenRect()
     {
-        // find canvas camera (null is fine for ScreenSpaceOverlay)
         Canvas rootCanvas = GetComponentInParent<Canvas>();
-        Camera cam = null;
-        if (rootCanvas != null && rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            cam = rootCanvas.worldCamera;
+        Camera cam = (rootCanvas != null && rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay) ? rootCanvas.worldCamera : null;
 
         Vector3[] worldCorners = new Vector3[4];
         rt.GetWorldCorners(worldCorners);
 
-        // convert corners to screen points and find top/bottom
-        Vector2[] screenCorners = new Vector2[4];
-        for (int i = 0; i < 4; i++)
-            screenCorners[i] = RectTransformUtility.WorldToScreenPoint(cam, worldCorners[i]);
-
-        // corners: 0=bottom-left, 1=top-left, 2=top-right, 3=bottom-right
-        float topY = Mathf.Max(screenCorners[1].y, screenCorners[2].y);
-        float bottomY = Mathf.Min(screenCorners[0].y, screenCorners[3].y);
-
-        originalTopY = topY;
-        originalBottomY = bottomY;
-        originalCenterY = (topY + bottomY) * 0.5f;
+        Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(cam, worldCorners[0]);
+        Vector2 screenPoint2 = RectTransformUtility.WorldToScreenPoint(cam, worldCorners[1]);
+        originalCenterY = (screenPoint.y + screenPoint2.y) * 0.5f;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (!string.IsNullOrEmpty(tooltipText))
+        {
+            TooltipManager.Instance.ShowTooltip(tooltipText);
+        }
         EvaluatePointerForHover(eventData);
     }
 
     public void OnPointerMove(PointerEventData eventData)
     {
+        TooltipManager.Instance.UpdatePosition();
         EvaluatePointerForHover(eventData);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        // pointer left the button entirely -> cancel hover
+        TooltipManager.Instance.HideTooltip();
         if (isHovered)
         {
             isHovered = false;
@@ -89,9 +81,7 @@ public class HoverMoveStable : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     private void EvaluatePointerForHover(PointerEventData eventData)
     {
-        // Use eventData.position (screen-space, pixels)
         float pointerY = eventData.position.y;
-
         bool pointerInTopHalfOfOriginal = pointerY > originalCenterY;
 
         if (pointerInTopHalfOfOriginal && !isHovered)
@@ -106,9 +96,6 @@ public class HoverMoveStable : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
     }
 
-    /// <summary>
-    /// If your layout changes at runtime (ContentSizeFitter/LayoutGroup), call this to recapture the hover region.
-    /// </summary>
     public void RefreshOriginalRegion()
     {
         CaptureOriginalScreenRect();
@@ -116,9 +103,4 @@ public class HoverMoveStable : MonoBehaviour, IPointerEnterHandler, IPointerExit
         targetLocalPos = originalLocalPos;
         velocity = Vector3.zero;
     }
-
-#if UNITY_EDITOR
-    [ContextMenu("Refresh Original Region")]
-    private void EditorRefresh() => RefreshOriginalRegion();
-#endif
 }
