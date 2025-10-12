@@ -35,10 +35,11 @@ public class EndCreditsController : MonoBehaviour
         {
             // Example fallback data
             List<string> credits = new List<string> {
-                "Game Design: The Professor",
-                "Programming: You",
-                "Art & Animation: AI & Friends",
-                "Music: Open Game Assets",
+                "Anshuman \"AnsxhuGod\" Behera - 3D",
+                "Animesh \"\" Tripathy - Programming ",
+                "Bidyendu \"RUSTGOD\" Das - Programming and 3D",
+                "Aditya \"Enigma\" Rout - Programming",
+                "Sumit \"ASURZURVAN\" Kumar Sahu - Sound",
                 "Special Thanks: You!"
             };
 

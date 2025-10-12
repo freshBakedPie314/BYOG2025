@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using Unity.Cinemachine;
 using TMPro;
+using UnityEngine.SceneManagement;
 using UnityEditor.Playables;
 
 public class BattleManager : MonoBehaviour
@@ -61,7 +62,7 @@ public class BattleManager : MonoBehaviour
     [Header("Boss Fight")]
     [Tooltip("Ability to be awarded after boss fight")]
     public Ability bossRewardAbility;
-
+    public bool isUltimateBattle = false;
     public enum BattleState { INACTIVE, STARTING, PLAYERTURN, ENEMYTURN, WON, LOST }
     public enum AreaType { Fire, Earth, Lightning, Snow }
     public BattleState currentState;
@@ -521,7 +522,10 @@ public class BattleManager : MonoBehaviour
         screenTransition.StartTransition(false);
         bossRewardAbility = null;
         currentRewardOnWin = null;
-        
+        if (isUltimateBattle)
+        {
+            SceneManager.LoadScene("End_Credits");
+        }
         
         if (currentEnemyInstance != null)
         {
@@ -529,6 +533,7 @@ public class BattleManager : MonoBehaviour
         }
         battleArena.SetActive(false);
         battleHUD.SetActive(false);
+        
         board.SetActive(true);
         boardHUD.SetActive(true);
         player.GetComponent<PlayerController>().canMove = true;
@@ -572,6 +577,7 @@ public class BattleManager : MonoBehaviour
         currentState = BattleState.STARTING;
         battleHUDManager.UpdateWarriors();
         battleHUDManager.UpdateStats();
+        isUltimateBattle = true;
         StartCoroutine(BattleSequence());
     }
 }
