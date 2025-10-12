@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using System.Collections;
 using Unity.Cinemachine;
 using TMPro;
+using UnityEngine.SceneManagement;
+using UnityEditor.Playables;
 
 public class BattleManager : MonoBehaviour
 {
@@ -60,7 +62,7 @@ public class BattleManager : MonoBehaviour
     [Header("Boss Fight")]
     [Tooltip("Ability to be awarded after boss fight")]
     public Ability bossRewardAbility;
-
+    public bool isUltimateBattle = false;
     public enum BattleState { INACTIVE, STARTING, PLAYERTURN, ENEMYTURN, WON, LOST }
     public enum AreaType { Fire, Earth, Lightning, Snow }
     public BattleState currentState;
@@ -437,6 +439,21 @@ public class BattleManager : MonoBehaviour
         currentRewardOnWin = null;
         if (currentEnemyInstance != null) Destroy(currentEnemyInstance);
         if (player != null) player.GetComponent<PlayerController>().canMove = true;
+        if (isUltimateBattle)
+        {
+            SceneManager.LoadScene("End_Credits");
+        }
+        
+        if (currentEnemyInstance != null)
+        {
+            Destroy(currentEnemyInstance);
+        }
+        battleArena.SetActive(false);
+        battleHUD.SetActive(false);
+        
+        board.SetActive(true);
+        boardHUD.SetActive(true);
+        player.GetComponent<PlayerController>().canMove = true;
         currentState = BattleState.INACTIVE;
         spawner.SpawnNextNCells(gameManager.currentPathIndex);
     }
@@ -447,7 +464,34 @@ public class BattleManager : MonoBehaviour
     {
         currentBattleArea = AreaType.Fire;
         playerBoardPosition = player.transform.position;
-
+        boardHUD.SetActive(false);
+        board.SetActive(false);
+        battleHUD.SetActive(true);
+        battleArena.SetActive(true);
+        player.transform.position = playerSpawnPoint.position;
+        player.transform.rotation = playerSpawnPoint.rotation;
+        Quaternion rot = Quaternion.Euler(enemySpawnPoint.rotation.x, enemySpawnPoint.rotation.y, enemySpawnPoint.rotation.z);
+        currentEnemyInstance = Instantiate(ultimateBossPrefab, enemySpawnPoint.position, rot);
+        enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
+        enemyStats.maxHealth = 6969;
+        enemyStats.currentHealth = 6969;
+        enemyStats.attackPower = 69;
+        enemyStats.defense = 69;
+        enemyStats.characterAbilities.Clear();
+        enemyStats.characterAbilities.Add(fireAreaAbility);
+        enemyStats.characterAbilities.Add(snowAreaAbility);
+        enemyStats.characterAbilities.Add(earthAreaAbility);
+        enemyStats.characterAbilities.Add(lightningAreaAbility);
+        enemyStats.normalAttack = slashAttack;
+        enemyStats.healAtHealthPercent = 20;
+        enemyStats.healingAbility = healAbility;
+        playerStats = player.GetComponent<CharacterStats>();
+        boardVCam.Priority = 5;
+        battleVCam.Priority = 10;
+        currentState = BattleState.STARTING;
+        battleHUDManager.UpdateWarriors();
+        battleHUDManager.UpdateStats();
+        isUltimateBattle = true;
         StartCoroutine(BattleSequence());
     }
 }
