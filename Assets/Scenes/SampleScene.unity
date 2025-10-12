@@ -8390,10 +8390,10 @@ RectTransform:
   - {fileID: 619129123}
   m_Father: {fileID: 2039171676}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 39}
-  m_SizeDelta: {x: -553.4965, y: 124.4149}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -160}
+  m_SizeDelta: {x: -553.4965, y: 124.41492}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1256887777
 MonoBehaviour:
@@ -9843,7 +9843,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1633553137892963830, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7.5
+      value: -7.7
       objectReference: {fileID: 0}
     - target: {fileID: 1633553137892963830, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
       propertyPath: m_LocalPosition.y
@@ -9851,7 +9851,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1633553137892963830, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -7.7
+      value: -7.6
       objectReference: {fileID: 0}
     - target: {fileID: 1633553137892963830, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
       propertyPath: m_LocalRotation.w
@@ -10019,6 +10019,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcadcc2143785034da9676c91801c971, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &1489710493 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2017767270813654433, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+  m_PrefabInstance: {fileID: 6517829970055296994}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1515360687
 GameObject:
   m_ObjectHideFlags: 0
@@ -11290,6 +11295,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1672898629}
   - component: {fileID: 1672898628}
+  - component: {fileID: 1672898630}
   m_Layer: 0
   m_Name: BoardCam
   m_TagString: Untagged
@@ -11355,6 +11361,41 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+--- !u!114 &1672898630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1672898627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f767209592d4a4142bb70c3268887e5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1489710493}
+  followOffset: {x: 0, y: 1.6, z: 0}
+  sensitivityX: 20
+  sensitivityY: 60
+  mouseXInput: Mouse X
+  mouseYInput: Mouse Y
+  invertY: 0
+  rotationSmoothTime: 0.08
+  minPitch: -35
+  maxPitch: 60
+  followSmoothTimeXZ: 0.06
+  followSmoothTimeY: 0.25
+  distance: 2
+  minDistance: 1.5
+  maxDistance: 8
+  enableZoom: 1
+  zoomSpeed: 2
+  enableCollision: 1
+  collisionRadius: 0.3
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  collisionSmoothTime: 0.05
 --- !u!1 &1683153645
 GameObject:
   m_ObjectHideFlags: 0
@@ -15006,6 +15047,18 @@ PrefabInstance:
       propertyPath: 'bossSkillRewards.Array.data[3]'
       value: 
       objectReference: {fileID: 11400000, guid: 165b04c0a0e741d46a47f035935eac2f, type: 2}
+    - target: {fileID: 5000946259408483652, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5000946259408483652, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5000946259408483652, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 5633227483926769662, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: m_IsActive
       value: 0
