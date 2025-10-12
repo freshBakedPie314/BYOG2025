@@ -40,7 +40,7 @@ public class BattleManager : MonoBehaviour
     public NextNSpawner spawner;
     public GameManager gameManager;
     private BattleHUDManager battleHUDManager;
-    private CameraShakeManager cameraShakeManager;
+    private CameraShakeManager cameraShakeManager; // Re-enabled this
 
     [Header("Area Abilities")]
     public Ability fireAreaAbility;
@@ -70,6 +70,7 @@ public class BattleManager : MonoBehaviour
     public enum BattleState { INACTIVE, STARTING, PLAYERTURN, ENEMYTURN, WON, LOST }
     public enum AreaType { Fire, Earth, Lightning, Snow }
     public BattleState currentState;
+    private AreaType currentBattleArea;
 
     private GameObject currentEnemyInstance;
     private CharacterStats playerStats;
@@ -83,16 +84,18 @@ public class BattleManager : MonoBehaviour
     public Ability healAbility;
 
     private bool isAttackInProgress = false;
+    private static bool isSpawningVFX = false;
+
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
-        cameraShakeManager = CameraShakeManager.Instance;
+        cameraShakeManager = CameraShakeManager.Instance; // Re-enabled this
     }
 
     // This is for NORMAL enemy battles
     public void StartBattle(AreaType area, Ability rewardOnWin)
     {
-
+        currentBattleArea = area;
         currentRewardOnWin = rewardOnWin;
         playerBoardPosition = player.transform.position;
 
@@ -108,7 +111,6 @@ public class BattleManager : MonoBehaviour
             case AreaType.Earth: enemyStats.characterAbilities.Add(earthAreaAbility); break;
             case AreaType.Lightning: enemyStats.characterAbilities.Add(lightningAreaAbility); break;
         }
-        print("Starting battle in area " + area.ToString());
         playerStats = player.GetComponent<CharacterStats>();
 
         currentState = BattleState.STARTING;
@@ -120,10 +122,14 @@ public class BattleManager : MonoBehaviour
     // This is for BOSS battles
     public void StartBossBattle(GameObject bossPrefab, Ability skillToLearn)
     {
+        if (skillToLearn == fireAreaAbility) currentBattleArea = AreaType.Fire;
+        else if (skillToLearn == snowAreaAbility) currentBattleArea = AreaType.Snow;
+        else if (skillToLearn == earthAreaAbility) currentBattleArea = AreaType.Earth;
+        else if (skillToLearn == lightningAreaAbility) currentBattleArea = AreaType.Lightning;
+
         bossRewardAbility = skillToLearn;
         playerBoardPosition = player.transform.position;
 
-        
         Quaternion rot = Quaternion.Euler(enemySpawnPoint.rotation.x - 90, enemySpawnPoint.rotation.y, enemySpawnPoint.rotation.z);
 
         currentEnemyInstance = Instantiate(bossPrefab, enemySpawnPoint.position, rot);
@@ -147,8 +153,10 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator BattleSequence()
     {
-        screenTransition.StartTransition(true);
+        // --- MODIFIED --- Now waits for the transition to finish
+        yield return screenTransition.StartTransition(true);
 
+        // This code will now run AFTER the transition has finished and the screen is visible
         ActivateArena();
         dialogueText.text = "A wild " + currentEnemyInstance.name.Replace("(Clone)", "") + " appears!";
         yield return new WaitForSeconds(2f);
@@ -158,38 +166,12 @@ public class BattleManager : MonoBehaviour
 
     void ActivateArena()
     {
-        switch (player.GetComponentInParent<PlayerController>().GetCurrentAreaColor())
-        {
-            case PlayerController.PlayerColor.Red:
-                FireArena.SetActive(true);
-                IceArena.SetActive(false);
-                ThunderARena.SetActive(false);
-                EarthArena.SetActive(false);
-                break;
-            case PlayerController.PlayerColor.Green:
-                FireArena.SetActive(false);
-                IceArena.SetActive(false);
-                ThunderARena.SetActive(false);
-                EarthArena.SetActive(true);
-                break;
-            case PlayerController.PlayerColor.Blue:
-                FireArena.SetActive(false);
-                IceArena.SetActive(true);
-                ThunderARena.SetActive(false);
-                EarthArena.SetActive(false);
-                break;
-            default:
-                FireArena.SetActive(false);
-                IceArena.SetActive(false);
-                ThunderARena.SetActive(true);
-                EarthArena.SetActive(false);
-                break;
-        }
+        // This logic is now part of the screen transition itself
     }
 
     void PlayerTurn()
     {
-        isAttackInProgress = false; // Ensure player can always act at the start of their turn
+        isAttackInProgress = false;
         dialogueText.text = "Player's Turn. Choose your move.";
         battleHUDManager.UpdateActionButtons(playerStats);
         playerStats.PrintPotionInventory();
@@ -199,11 +181,7 @@ public class BattleManager : MonoBehaviour
     {
         if (isAttackInProgress) return;
         isAttackInProgress = true;
-        if (currentState != BattleState.PLAYERTURN)
-        {
-            isAttackInProgress = false; // Unlock if clicked at wrong time
-            return;
-        }
+        if (currentState != BattleState.PLAYERTURN) { isAttackInProgress = false; return; }
         StartCoroutine(PlayerAction(ability));
     }
 
@@ -221,78 +199,37 @@ public class BattleManager : MonoBehaviour
             {
                 dialogueText.text = "You don't have any " + ability.name + " left!";
                 yield return new WaitForSeconds(2f);
-                isAttackInProgress = false; // Unlock controls if action fails
+                isAttackInProgress = false;
                 yield break;
             }
         }
         else
         {
-            if (ability.targetType == Ability.TargetType.Self)
-            {
-                ability.Execute(playerStats, playerStats);
-            }
-            else
-            {
-                ability.Execute(playerStats, enemyStats);
-            }
+            if (ability.targetType == Ability.TargetType.Self) ability.Execute(playerStats, playerStats);
+            else ability.Execute(playerStats, enemyStats);
         }
 
-        //animation coroutine
         if (ability.abilityName == "Slash")
         {
             yield return MoveForwardRoutine(1);
         }
         else if (ability.abilityName == "Block")
         {
-            GameObject blockfx = Instantiate(blockVFX, player.transform);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
+            GameObject vfx = Instantiate(blockVFX, player.transform);
+            yield return new WaitForSeconds(2.5f); Destroy(vfx);
         }
-        else if (ability.abilityName == "Damge Inc")
+        else if (ability.abilityName == "Burn" || ability.abilityName == "Stun" || ability.abilityName == "Frost")
         {
-            GameObject blockfx = Instantiate(dmgVFX, player.transform);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
-        }
-        else if (ability.abilityName == "Defense Inc")
-        {
-            GameObject blockfx = Instantiate(defVFX, player.transform);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
-        }
-        else if (ability.abilityName == "Heal")
-        {
-            GameObject blockfx = Instantiate(healVFX, player.transform);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
-        }
-        else if (ability.abilityName == "Burn")
-        {
-            GameObject blockfx = Instantiate(burnVFX, enemyStats.gameObject.transform);
-            cameraShakeManager.Shake(.8f);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
-        }
-        else if (ability.abilityName == "Stun")
-        {
-            GameObject blockfx = Instantiate(stunVFX, enemyStats.gameObject.transform);
-            cameraShakeManager.Shake(.8f);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
+            GameObject vfxPrefab = (ability.abilityName == "Stun") ? stunVFX : (ability.abilityName == "Frost") ? frostVFX : burnVFX;
+            GameObject vfx = Instantiate(vfxPrefab, enemyStats.gameObject.transform);
+            if (cameraShakeManager != null) cameraShakeManager.Shake(5f);
+            yield return new WaitForSeconds(2.5f); Destroy(vfx);
         }
         else if (ability.abilityName == "Quake")
         {
-            GameObject blockfx = Instantiate(quakeVFX, enemyStats.gameObject.transform);
-            cameraShakeManager.Shake(.8f);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
-        }
-        else if (ability.abilityName == "Frost")
-        {
-            GameObject blockfx = Instantiate(frostVFX, enemyStats.gameObject.transform);
-            cameraShakeManager.Shake(.8f);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
+            GameObject vfx = Instantiate(quakeVFX, enemyStats.gameObject.transform);
+            if (cameraShakeManager != null) cameraShakeManager.Shake(8f);
+            yield return new WaitForSeconds(2.5f); Destroy(vfx);
         }
 
         battleHUDManager.UpdateStats();
@@ -311,29 +248,20 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // --- MODIFIED --- Changed from 'void' to 'IEnumerator' to allow for pauses
     IEnumerator ProcessStatusEffects(CharacterStats character)
     {
         if (character == null) yield break;
-
-        // Loop backwards in case effects are removed from the list during iteration
         for (int i = character.activeStatusEffects.Count - 1; i >= 0; i--)
         {
             StatusEffect effect = character.activeStatusEffects[i];
             if (effect == null) continue;
-
-            // --- ADDED --- Logic to display text for burn damage
             int healthBeforeTick = character.currentHealth;
             effect.OnTurnTick(character);
-
             if (!string.IsNullOrEmpty(effect.effectName) && effect.effectName.Contains("Burn") && character.currentHealth < healthBeforeTick)
             {
-                string characterName = (character == playerStats) ? "Player" : "The enemy";
-                dialogueText.text = $"{characterName} takes damage from the burn!";
-                yield return new WaitForSeconds(1.5f); // Pause to let the player read the message
+                dialogueText.text = $"{character.name} takes damage from the burn!";
+                yield return new WaitForSeconds(1.5f);
             }
-            // --- END ADDED ---
-
             if (effect.duration <= 0)
             {
                 effect.OnRemove(character);
@@ -346,10 +274,8 @@ public class BattleManager : MonoBehaviour
     IEnumerator EnemyTurn()
     {
         dialogueText.text = "Enemy's Turn.";
-        // --- MODIFIED --- Now calling this as a coroutine
         yield return StartCoroutine(ProcessStatusEffects(enemyStats));
         yield return new WaitForSeconds(1f);
-
         if (enemyStats.isStunned)
         {
             dialogueText.text = "Enemy is stunned and cannot act!";
@@ -357,34 +283,20 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            // ... (rest of enemy attack logic is unchanged) ...
             Ability abilityToUse = null;
             string actionText = "";
-
-            bool shouldConsiderHealing = enemyStats.healingAbility != null &&
-                                         enemyStats.currentHealth < (enemyStats.maxHealth * enemyStats.healAtHealthPercent);
-
+            bool shouldConsiderHealing = enemyStats.healingAbility != null && (enemyStats.currentHealth < (enemyStats.maxHealth * enemyStats.healAtHealthPercent));
             if (shouldConsiderHealing && Random.Range(1, 101) <= 20)
             {
                 abilityToUse = enemyStats.healingAbility;
                 actionText = "Enemy heals itself!";
-                GameObject blockfx = Instantiate(healVFX, enemyStats.gameObject.transform);
-                yield return new WaitForSeconds(1.5f);
-                Destroy(blockfx);
+                GameObject vfx = Instantiate(healVFX, enemyStats.gameObject.transform);
+                yield return new WaitForSeconds(1.5f); Destroy(vfx);
                 abilityToUse.Execute(enemyStats, enemyStats);
             }
             else
             {
-                int randomChance = Random.Range(0, 100);
-                if (enemyStats.characterAbilities.Count > 0 && randomChance < enemyStats.specialAbilityChance)
-                {
-                    abilityToUse = enemyStats.characterAbilities[0];
-                }
-                else
-                {
-                    abilityToUse = enemyStats.normalAttack;
-                }
-
+                abilityToUse = (enemyStats.characterAbilities.Count > 0 && Random.Range(0, 100) < enemyStats.specialAbilityChance) ? enemyStats.characterAbilities[0] : enemyStats.normalAttack;
                 if (abilityToUse != null)
                 {
                     actionText = "Enemy uses " + abilityToUse.abilityName + "!";
@@ -392,26 +304,27 @@ public class BattleManager : MonoBehaviour
                     {
                         yield return MoveForwardRoutine(-1);
                     }
-                    else if (abilityToUse.abilityName == "Block")
+                    else if (abilityToUse.abilityName == "Burn" || abilityToUse.abilityName == "Stun" || abilityToUse.abilityName == "Frost")
                     {
-                        GameObject blockfx = Instantiate(blockVFX, enemyStats.gameObject.transform);
-                        yield return new WaitForSeconds(6f);
-                        Destroy(blockfx);
+                        GameObject vfxPrefab = (abilityToUse.abilityName == "Stun") ? stunVFX : (abilityToUse.abilityName == "Frost") ? frostVFX : burnVFX;
+                        GameObject vfx = Instantiate(vfxPrefab, player.transform);
+                        if (cameraShakeManager != null) cameraShakeManager.Shake(5f);
+                        yield return new WaitForSeconds(2.5f); Destroy(vfx);
                     }
-                    // ... other ability animations
+                    else if (abilityToUse.abilityName == "Quake")
+                    {
+                        GameObject vfx = Instantiate(quakeVFX, player.transform);
+                        if (cameraShakeManager != null) cameraShakeManager.Shake(8f);
+                        yield return new WaitForSeconds(2.5f); Destroy(vfx);
+                    }
                     abilityToUse.Execute(enemyStats, playerStats);
                 }
-                else
-                {
-                    actionText = "Enemy has no moves!";
-                }
+                else { actionText = "Enemy has no moves!"; }
             }
             dialogueText.text = actionText;
             yield return new WaitForSeconds(2f);
         }
-
-        isAttackInProgress = false; // Reset for the player's next turn
-
+        isAttackInProgress = false;
         battleHUDManager.UpdateStats();
         if (playerStats.currentHealth <= 0)
         {
@@ -420,14 +333,12 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            // --- MODIFIED --- Also calling this as a coroutine
             yield return StartCoroutine(ProcessStatusEffects(playerStats));
-
             if (playerStats.isStunned)
             {
                 dialogueText.text = "Player is stunned and cannot act!";
                 yield return new WaitForSeconds(2f);
-                StartCoroutine(EnemyTurn()); // Enemy gets another turn if player is stunned
+                StartCoroutine(EnemyTurn());
             }
             else
             {
@@ -439,14 +350,21 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator SpawnSlashVFX(int direction, Transform pawn, Transform opp)
     {
-        // ... (this method is unchanged) ...
-        PlayerController.PlayerColor color = player.GetComponent<PlayerController>().startArea;
-        if (pawn.transform != player.transform)
+        if (isSpawningVFX) yield break;
+        isSpawningVFX = true;
+
+        PlayerController.PlayerColor color;
+        switch (currentBattleArea)
         {
-            color = player.GetComponentInParent<PlayerController>().currentArea;
+            case AreaType.Fire: color = PlayerController.PlayerColor.Red; break;
+            case AreaType.Snow: color = PlayerController.PlayerColor.Blue; break;
+            case AreaType.Earth: color = PlayerController.PlayerColor.Green; break;
+            case AreaType.Lightning: color = PlayerController.PlayerColor.Yellow; break;
+            default: color = player.GetComponent<PlayerController>().startArea; break;
         }
+
         Vector3 spAngle = new Vector3(0, direction * 90, 90);
-        GameObject vfxToSpawn = slashVFXfire; // default
+        GameObject vfxToSpawn = slashVFXfire;
         switch (color)
         {
             case PlayerController.PlayerColor.Red: vfxToSpawn = slashVFXfire; break;
@@ -458,23 +376,22 @@ public class BattleManager : MonoBehaviour
         GameObject vfx = Instantiate(vfxToSpawn, pawn.position, Quaternion.Euler(spAngle));
         yield return new WaitForSeconds(0.1f);
         GameObject impact = Instantiate(impactVFX, opp);
-        cameraShakeManager.Shake(0.8f);
+        if (cameraShakeManager != null) cameraShakeManager.Shake(5f);
         yield return new WaitForSeconds(0.5f);
         Destroy(impact);
         Destroy(vfx);
+
+        isSpawningVFX = false;
     }
 
     private IEnumerator MoveForwardRoutine(int direction)
     {
-        // ... (this method is mostly unchanged) ...
         float moveDistance = 4f;
         float moveDuration = 0.5f;
         Transform pawn = (direction == 1) ? player.transform : enemyStats.gameObject.transform;
         Transform opp = (direction == 1) ? enemyStats.gameObject.transform : player.transform;
-
         Vector3 startPos = pawn.position;
         Vector3 endPos = startPos + pawn.right * direction * moveDistance;
-
         yield return MoveBetween(pawn, startPos, endPos, moveDuration);
         yield return SpawnSlashVFX(direction, pawn, opp);
         yield return MoveBetween(pawn, endPos, startPos, moveDuration);
@@ -482,12 +399,11 @@ public class BattleManager : MonoBehaviour
 
     private IEnumerator MoveBetween(Transform pawn, Vector3 from, Vector3 to, float duration)
     {
-        // ... (this method is unchanged) ...
         float elapsed = 0f;
         while (elapsed < duration)
         {
             float t = elapsed / duration;
-            t = t * t * (3f - 2f * t); // smoothstep ease
+            t = t * t * (3f - 2f * t);
             pawn.position = Vector3.Lerp(from, to, t);
             elapsed += Time.deltaTime;
             yield return null;
@@ -496,7 +412,6 @@ public class BattleManager : MonoBehaviour
     }
     IEnumerator EndBattleSequence()
     {
-        // ... (this method is unchanged) ...
         if (currentState == BattleState.WON)
         {
             WinnerCanvas.SetActive(true);
@@ -520,18 +435,20 @@ public class BattleManager : MonoBehaviour
             loserCanvas.SetActive(false);
             SceneManager.LoadSceneAsync("MainMenu");
         }
-
         yield return new WaitForSeconds(3f);
         WinnerCanvas.SetActive(false);
+
+        // --- MODIFIED --- Now waits for the transition to finish
+        yield return screenTransition.StartTransition(false);
         EndBattle();
     }
 
     public void EndBattle()
     {
-        // ... (this method is unchanged) ...
-        screenTransition.StartTransition(false);
         bossRewardAbility = null;
         currentRewardOnWin = null;
+        if (currentEnemyInstance != null) Destroy(currentEnemyInstance);
+        if (player != null) player.GetComponent<PlayerController>().canMove = true;
         if (isUltimateBattle)
         {
             SceneManager.LoadScene("End_Credits");
@@ -551,14 +468,11 @@ public class BattleManager : MonoBehaviour
         spawner.SpawnNextNCells(gameManager.currentPathIndex);
     }
 
-    public GameObject GetCurrentEnemyInstance()
-    {
-        return currentEnemyInstance;
-    }
+    public GameObject GetCurrentEnemyInstance() { return currentEnemyInstance; }
 
     public void StartUltimateBattle()
     {
-        // ... (this method is unchanged) ...
+        currentBattleArea = AreaType.Fire;
         playerBoardPosition = player.transform.position;
         boardHUD.SetActive(false);
         board.SetActive(false);
@@ -591,3 +505,4 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(BattleSequence());
     }
 }
+
