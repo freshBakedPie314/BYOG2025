@@ -153,7 +153,7 @@ public class BattleManager : MonoBehaviour
 
     void ActivateArena()
     {
-        switch (player.GetComponentInParent<PlayerController>().currentArea)
+        switch (player.GetComponentInParent<PlayerController>().GetCurrentAreaColor())
         {
             case PlayerController.PlayerColor.Red:
                 FireArena.SetActive(true);

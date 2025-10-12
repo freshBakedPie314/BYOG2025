@@ -62,6 +62,20 @@ public class PlayerController : MonoBehaviour
     public string permaDmgIncDesc;
     public string permaDefIncDec;
 
+
+    [Header("Move Animation (Jump & Squash)")]
+    [Tooltip("Peak jump height (world units) during a single step")]
+    public float jumpHeight = 0.5f;
+
+    [Tooltip("Horizontal squash amount on landing/takeoff (0 - 0.5)")]
+    public float squashAmount = 0.18f;
+
+    [Tooltip("Vertical stretch amount at mid-air (0 - 0.5)")]
+    public float stretchAmount = 0.22f;
+
+    [Tooltip("Minimum duration per step to avoid extremely short hops")]
+    public float minStepDuration = 0.08f;
+
     void Awake()
     {
         GenerateAllPaths();
@@ -167,14 +181,64 @@ public class PlayerController : MonoBehaviour
             {
                 currentPathIndex++;
                 Vector3 targetPosition = currentPath[currentPathIndex];
-                while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
-                {
-                    transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
-                    yield return null;
-                }
+
+                // Perform a stylized jump+squash for this step
+                yield return StartCoroutine(MoveStep(targetPosition));
+
+                // Snap exactly to the target and reset scale (defensive)
                 transform.position = targetPosition;
+                transform.localScale = Vector3.one;
             }
         }
+    }
+
+    private IEnumerator MoveStep(Vector3 targetPosition)
+    {
+        Vector3 startPos = transform.position;
+
+        // Use horizontal distance to determine step duration (so faster moveSpeed -> shorter time)
+        Vector3 horizStart = new Vector3(startPos.x, 0f, startPos.z);
+        Vector3 horizTarget = new Vector3(targetPosition.x, 0f, targetPosition.z);
+        float horizontalDistance = Vector3.Distance(horizStart, horizTarget);
+
+        float duration = Mathf.Max(minStepDuration, horizontalDistance / Mathf.Max(0.0001f, moveSpeed));
+
+        float elapsed = 0f;
+        Vector3 originalScale = transform.localScale;
+
+        // We'll use targetPosition.y as the ground height (you can switch to startPos.y if desired)
+        float baseY = targetPosition.y;
+
+        while (elapsed < duration)
+        {
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            // Horizontal interpolation
+            Vector3 horiz = Vector3.Lerp(horizStart, horizTarget, t);
+
+            // Parabolic vertical arc (peak at t=0.5)
+            float yOffset = 4f * jumpHeight * t * (1f - t);
+
+            Vector3 pos = new Vector3(horiz.x, baseY + yOffset, horiz.z);
+            transform.position = pos;
+
+            // Squash/stretch curves:
+            // pMid (1 at mid-air) and pEnds (1 at ends)
+            float pMid = Mathf.Clamp01(1f - 4f * (t - 0.5f) * (t - 0.5f)); // 1 - 4*(t-0.5)^2
+            float pEnds = 1f - pMid;
+
+            float scaleY = 1f + stretchAmount * pMid - squashAmount * pEnds;
+            float scaleXZ = 1f - (stretchAmount * 0.5f) * pMid + squashAmount * pEnds;
+
+            transform.localScale = new Vector3(scaleXZ * originalScale.x, scaleY * originalScale.y, scaleXZ * originalScale.z);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Ensure exact final state
+        transform.position = targetPosition;
+        transform.localScale = originalScale;
     }
 
     private void CheckLandedCell()
@@ -238,7 +302,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private PlayerColor GetCurrentAreaColor()
+    public PlayerColor GetCurrentAreaColor()
     {
         int pathLength = currentPath.Length - 5;
         int segmentLength = pathLength / 4;

@@ -713,6 +713,7 @@ MonoBehaviour:
   impactVFX: {fileID: 8500920156052182585, guid: 830e92a3f95c4b04caf8edd648aed9bd, type: 3}
   bossRewardAbility: {fileID: 0}
   currentState: 0
+  playerBoardPosition: {x: 0, y: 0, z: 0}
   screenTransition: {fileID: 1044215981}
   ultimateBossPrefab: {fileID: 1202224435539259145, guid: 6acf2ef314d44cc419745e3d566b2ee3, type: 3}
   slashAttack: {fileID: 11400000, guid: 13b69619b9f1b0748bcd8540a7d217e5, type: 2}
@@ -11383,12 +11384,12 @@ MonoBehaviour:
   rotationSmoothTime: 0.08
   minPitch: -35
   maxPitch: 60
-  followSmoothTimeXZ: 0.06
-  followSmoothTimeY: 0.25
+  followSmoothTimeXZ: 0.1
+  followSmoothTimeY: 2
   distance: 2
   minDistance: 1.5
   maxDistance: 8
-  enableZoom: 1
+  enableZoom: 0
   zoomSpeed: 2
   enableCollision: 1
   collisionRadius: 0.3
@@ -14901,6 +14902,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -840863614, guid: 72fdeded3ded882499e040940ec3df18, type: 3}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: moveSpeed
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: jumpHeight
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: chohiceMenu
       value: 
       objectReference: {fileID: 1189305639}
@@ -14925,6 +14934,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 157236911}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: squashAmount
+      value: 0.24
+      objectReference: {fileID: 0}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: battleManager
       value: 
       objectReference: {fileID: 157236912}
@@ -14938,6 +14951,10 @@ PrefabInstance:
         maximum health by 5 points.
       objectReference: {fileID: 0}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: stretchAmount
+      value: 0.45
+      objectReference: {fileID: 0}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: permaDefIncDec
       value: An ally's unwavering spirit reinforces your guard, permanently increasing
         your defense.
@@ -14946,6 +14963,10 @@ PrefabInstance:
       propertyPath: fireAreaAbility
       value: 
       objectReference: {fileID: 11400000, guid: 59b5dec23e0ec674e9f9e49b8b86e58b, type: 2}
+    - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: minStepDuration
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 4051880965624082710, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: permaDmgIncDesc
       value: An ally's war cry awakens your inner strength, permanently increasing
