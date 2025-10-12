@@ -35,7 +35,7 @@ public class BattleManager : MonoBehaviour
     public NextNSpawner spawner;
     public GameManager gameManager;
     private BattleHUDManager battleHUDManager;
-    private CameraShakeManager cameraShakeManager; // Re-enabled this
+    private CameraShakeManager cameraShakeManager;
 
     [Header("Area Abilities")]
     public Ability fireAreaAbility;
@@ -88,7 +88,6 @@ public class BattleManager : MonoBehaviour
         audioPlayer = GetComponent<AudioSource>();
     }
 
-    // This is for NORMAL enemy battles
     public void StartBattle(AreaType area, Ability rewardOnWin)
     {
         currentBattleArea = area;
@@ -115,7 +114,6 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(BattleSequence());
     }
 
-    // This is for BOSS battles
     public void StartBossBattle(GameObject bossPrefab, Ability skillToLearn)
     {
         if (skillToLearn == fireAreaAbility) currentBattleArea = AreaType.Fire;
@@ -149,20 +147,38 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator BattleSequence()
     {
-        // --- MODIFIED --- Now waits for the transition to finish
+        ActivateArena();
         yield return screenTransition.StartTransition(true);
 
-        // This code will now run AFTER the transition has finished and the screen is visible
-        ActivateArena();
+        
         dialogueText.text = "A wild " + currentEnemyInstance.name.Replace("(Clone)", "") + " appears!";
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f); // Changed from 2f to 1f
         currentState = BattleState.PLAYERTURN;
         PlayerTurn();
     }
 
     void ActivateArena()
     {
-        // This logic is now part of the screen transition itself
+        FireArena.SetActive(false);
+        IceArena.SetActive(false);
+        ThunderARena.SetActive(false);
+        EarthArena.SetActive(false);
+
+        switch (currentBattleArea)
+        {
+            case AreaType.Fire:
+                FireArena.SetActive(true);
+                break;
+            case AreaType.Earth:
+                EarthArena.SetActive(true);
+                break;
+            case AreaType.Snow:
+                IceArena.SetActive(true);
+                break;
+            case AreaType.Lightning:
+                ThunderARena.SetActive(true);
+                break;
+        }
     }
 
     void PlayerTurn()
@@ -201,7 +217,6 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            //test
             if (ability.targetType == Ability.TargetType.Self) ability.Execute(playerStats, playerStats);
             else ability.Execute(playerStats, enemyStats);
         }
@@ -358,7 +373,6 @@ public class BattleManager : MonoBehaviour
                         if (cameraShakeManager != null) cameraShakeManager.Shake(8f);
                         yield return new WaitForSeconds(2.5f); Destroy(vfx);
                     }
-                    // ... other ability animations
                     if (abilityToUse.abilityName != "Slash") playSFX(abilityToUse);
                     abilityToUse.Execute(enemyStats, playerStats);
                 }
@@ -476,7 +490,6 @@ public class BattleManager : MonoBehaviour
         }
         yield return new WaitForSeconds(3f);
 
-        // --- MODIFIED --- Now waits for the transition to finish
         yield return screenTransition.StartTransition(false);
         EndBattle();
     }
@@ -491,14 +504,14 @@ public class BattleManager : MonoBehaviour
         {
             SceneManager.LoadScene("End_Credits");
         }
-        
+
         if (currentEnemyInstance != null)
         {
             Destroy(currentEnemyInstance);
         }
         battleArena.SetActive(false);
         battleHUD.SetActive(false);
-        
+
         board.SetActive(true);
         boardHUD.SetActive(true);
         player.GetComponent<PlayerController>().canMove = true;
@@ -551,3 +564,4 @@ public class BattleManager : MonoBehaviour
         audioPlayer.Play();
     }
 }
+
