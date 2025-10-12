@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Unity.Cinemachine;
-using UnityEngine.Splines.ExtrusionShapes;
-using TMPro;
+
 
 public class ScreenTransition : MonoBehaviour
 {

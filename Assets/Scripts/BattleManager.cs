@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
+
 using System.Collections;
 using Unity.Cinemachine;
 using TMPro;
 using UnityEngine.SceneManagement;
-using UnityEditor.Playables;
+
 
 public class BattleManager : MonoBehaviour
 {
@@ -31,7 +31,11 @@ public class BattleManager : MonoBehaviour
     public GameObject boardHUD;
     public GameObject battleHUD;
     public TextMeshProUGUI dialogueText;
-
+    public TextMeshProUGUI stateText;
+    public TextMeshProUGUI dialoguebox;
+    public GameObject WinnerCanvas;
+    public GameObject loserCanvas;
+    
     [Header("Manager")]
     public NextNSpawner spawner;
     public GameManager gameManager;
@@ -495,7 +499,8 @@ public class BattleManager : MonoBehaviour
         // ... (this method is unchanged) ...
         if (currentState == BattleState.WON)
         {
-            dialogueText.text = "You won the battle!";
+            WinnerCanvas.SetActive(true);
+            stateText.text = "You won the battle!";
             if (bossRewardAbility != null && !playerStats.characterAbilities.Contains(bossRewardAbility))
             {
                 playerStats.characterAbilities.Add(bossRewardAbility);
@@ -509,10 +514,15 @@ public class BattleManager : MonoBehaviour
         }
         else if (currentState == BattleState.LOST)
         {
-            dialogueText.text = "You were defeated.";
+
+            loserCanvas.SetActive(true);
+            yield return new WaitForSeconds(3f);
+            loserCanvas.SetActive(false);
+            SceneManager.LoadSceneAsync("MainMenu");
         }
 
         yield return new WaitForSeconds(3f);
+        WinnerCanvas.SetActive(false);
         EndBattle();
     }
 
