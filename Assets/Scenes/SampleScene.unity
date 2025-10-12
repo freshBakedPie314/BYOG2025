@@ -793,6 +793,7 @@ MonoBehaviour:
   defVFX: {fileID: 1289543790355709915, guid: b99922c2f59b1a542bdd06ae8bee47ae, type: 3}
   impactVFX: {fileID: 8500920156052182585, guid: 830e92a3f95c4b04caf8edd648aed9bd, type: 3}
   bossRewardAbility: {fileID: 0}
+  isUltimateBattle: 0
   currentState: 0
   playerBoardPosition: {x: 0, y: 0, z: 0}
   screenTransition: {fileID: 1044215981}
@@ -1434,7 +1435,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 60.004776}
+  m_AnchoredPosition: {x: 0, y: 60.004883}
   m_SizeDelta: {x: -1639, y: -663.062}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &238402093
@@ -8865,7 +8866,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 48.20642}
+  m_AnchoredPosition: {x: 0, y: 48.206543}
   m_SizeDelta: {x: 0, y: 215.8}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1084547729
@@ -11851,6 +11852,7 @@ PrefabInstance:
     - {fileID: 284203591221271507, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
     - {fileID: 8878939172080724857, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
     - {fileID: 4509535502395708434, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
+    - {fileID: 5160869382967972957, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 9036879292948495458, guid: 0cfb499fe60c870429000f1840eb4381, type: 3}
       insertIndex: -1
