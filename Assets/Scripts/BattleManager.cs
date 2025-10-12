@@ -20,6 +20,12 @@ public class BattleManager : MonoBehaviour
     public CinemachineCamera boardVCam;
     public CinemachineCamera battleVCam;
 
+    [Header("Arena Prefabs")]
+    public GameObject FireArena;
+    public GameObject IceArena;
+    public GameObject ThunderARena;
+    public GameObject EarthArena;
+
     [Header("HUDs & UI")]
     public GameObject boardHUD;
     public GameObject battleHUD;
@@ -143,11 +149,43 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator BattleSequence()
     {
+        ActivateArena();
         screenTransition.StartTransition(true);
         dialogueText.text = "A wild " + currentEnemyInstance.name.Replace("(Clone)", "") + " appears!";
         yield return new WaitForSeconds(2f);
         currentState = BattleState.PLAYERTURN;
         PlayerTurn();
+    }
+
+    void ActivateArena()
+    {
+        switch (player.GetComponentInParent<PlayerController>().currentArea)
+        {
+            case PlayerController.PlayerColor.Red:
+                FireArena.SetActive(true);
+                IceArena.SetActive(false);
+                ThunderARena.SetActive(false);
+                EarthArena.SetActive(false);
+                break;
+            case PlayerController.PlayerColor.Green:
+                FireArena.SetActive(false);
+                IceArena.SetActive(false);
+                ThunderARena.SetActive(false);
+                EarthArena.SetActive(true);
+                break;
+            case PlayerController.PlayerColor.Blue:
+                FireArena.SetActive(false);
+                IceArena.SetActive(true);
+                ThunderARena.SetActive(false);
+                EarthArena.SetActive(false);
+                break;
+            default:
+                FireArena.SetActive(false);
+                IceArena.SetActive(false);
+                ThunderARena.SetActive(true);
+                EarthArena.SetActive(false);
+                break;
+        }
     }
 
     void PlayerTurn()
