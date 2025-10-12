@@ -17862,6 +17862,10 @@ PrefabInstance:
       propertyPath: m_Center.y
       value: 0.47107148
       objectReference: {fileID: 0}
+    - target: {fileID: 1322819231117218074, guid: f4018b852bb5ff6409143066edf17264, type: 3}
+      propertyPath: maxHealth
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 2017767270813654433, guid: f4018b852bb5ff6409143066edf17264, type: 3}
       propertyPath: m_LocalPosition.x
       value: -14.21
