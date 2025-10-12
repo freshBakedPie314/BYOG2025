@@ -69,7 +69,7 @@ public class BattleManager : MonoBehaviour
     private GameObject currentEnemyInstance;
     private CharacterStats playerStats;
     private CharacterStats enemyStats;
-    private Vector3 playerBoardPosition;
+    public Vector3 playerBoardPosition;
     private Ability currentRewardOnWin;
 
     public ScreenTransition screenTransition;
@@ -90,11 +90,6 @@ public class BattleManager : MonoBehaviour
 
         currentRewardOnWin = rewardOnWin;
         playerBoardPosition = player.transform.position;
-
-
-
-        player.transform.position = playerSpawnPoint.position;
-        player.transform.rotation = playerSpawnPoint.rotation;
 
         int enemyIndex = Random.Range(0, enemyPrefabs.Length);
         currentEnemyInstance = Instantiate(enemyPrefabs[enemyIndex], enemySpawnPoint.position, enemySpawnPoint.rotation);
@@ -123,9 +118,7 @@ public class BattleManager : MonoBehaviour
         bossRewardAbility = skillToLearn;
         playerBoardPosition = player.transform.position;
 
-        player.transform.position = playerSpawnPoint.position;
-        player.transform.rotation = playerSpawnPoint.rotation;
-
+        
         Quaternion rot = Quaternion.Euler(enemySpawnPoint.rotation.x - 90, enemySpawnPoint.rotation.y, enemySpawnPoint.rotation.z);
 
         currentEnemyInstance = Instantiate(bossPrefab, enemySpawnPoint.position, rot);
@@ -149,8 +142,9 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator BattleSequence()
     {
-        ActivateArena();
         screenTransition.StartTransition(true);
+
+        ActivateArena();
         dialogueText.text = "A wild " + currentEnemyInstance.name.Replace("(Clone)", "") + " appears!";
         yield return new WaitForSeconds(2f);
         currentState = BattleState.PLAYERTURN;
@@ -527,7 +521,8 @@ public class BattleManager : MonoBehaviour
         screenTransition.StartTransition(false);
         bossRewardAbility = null;
         currentRewardOnWin = null;
-        player.transform.position = playerBoardPosition;
+        
+        
         if (currentEnemyInstance != null)
         {
             Destroy(currentEnemyInstance);

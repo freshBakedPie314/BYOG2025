@@ -87,9 +87,18 @@ public class ScreenTransition : MonoBehaviour
             boardVCam.Priority = 10;
             battleVCam.Priority = 5;
         }
+        if (toBattle)
+        {
+            battleManager.player.transform.position = battleManager.playerSpawnPoint.position;
+            battleManager.player.transform.rotation = battleManager.playerSpawnPoint.rotation;
+        }
+        else
+        {
+            battleManager.player.transform.position = battleManager.playerBoardPosition;
+        }
 
-        // 3️ Wait while covered
-        Debug.Log($"[ScreenTransition] Pausing for {pauseDuration} seconds...");
+            // 3️ Wait while covered
+            Debug.Log($"[ScreenTransition] Pausing for {pauseDuration} seconds...");
         yield return new WaitForSeconds(pauseDuration);
 
         boardHUD.SetActive(!toBattle);
