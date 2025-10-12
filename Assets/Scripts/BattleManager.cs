@@ -4,7 +4,6 @@ using System.Collections;
 using Unity.Cinemachine;
 using TMPro;
 using UnityEngine.SceneManagement;
-using UnityEditor.Playables;
 
 public class BattleManager : MonoBehaviour
 {

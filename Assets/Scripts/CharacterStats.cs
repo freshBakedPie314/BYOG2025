@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEditor.Playables;
 
 public class CharacterStats : MonoBehaviour
 {
