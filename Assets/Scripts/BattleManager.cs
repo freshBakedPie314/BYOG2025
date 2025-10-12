@@ -78,10 +78,12 @@ public class BattleManager : MonoBehaviour
     public Ability healAbility;
 
     private bool isAttackInProgress = false;
+    private AudioSource audioPlayer;
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
         cameraShakeManager = CameraShakeManager.Instance;
+        audioPlayer = GetComponent<AudioSource>();
     }
 
     // This is for NORMAL enemy battles
@@ -235,29 +237,33 @@ public class BattleManager : MonoBehaviour
         //animation coroutine
         if (ability.abilityName == "Slash")
         {
-            yield return MoveForwardRoutine(1);
+            yield return MoveForwardRoutine(1, ability);
         }
         else if (ability.abilityName == "Block")
         {
             GameObject blockfx = Instantiate(blockVFX, player.transform);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
         else if (ability.abilityName == "Damge Inc")
         {
             GameObject blockfx = Instantiate(dmgVFX, player.transform);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
         else if (ability.abilityName == "Defense Inc")
         {
             GameObject blockfx = Instantiate(defVFX, player.transform);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
         else if (ability.abilityName == "Heal")
         {
             GameObject blockfx = Instantiate(healVFX, player.transform);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
@@ -265,6 +271,7 @@ public class BattleManager : MonoBehaviour
         {
             GameObject blockfx = Instantiate(burnVFX, enemyStats.gameObject.transform);
             cameraShakeManager.Shake(.8f);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
@@ -272,6 +279,7 @@ public class BattleManager : MonoBehaviour
         {
             GameObject blockfx = Instantiate(stunVFX, enemyStats.gameObject.transform);
             cameraShakeManager.Shake(.8f);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
@@ -279,6 +287,7 @@ public class BattleManager : MonoBehaviour
         {
             GameObject blockfx = Instantiate(quakeVFX, enemyStats.gameObject.transform);
             cameraShakeManager.Shake(.8f);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
@@ -286,6 +295,7 @@ public class BattleManager : MonoBehaviour
         {
             GameObject blockfx = Instantiate(frostVFX, enemyStats.gameObject.transform);
             cameraShakeManager.Shake(.8f);
+            playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
@@ -364,6 +374,7 @@ public class BattleManager : MonoBehaviour
                 abilityToUse = enemyStats.healingAbility;
                 actionText = "Enemy heals itself!";
                 GameObject blockfx = Instantiate(healVFX, enemyStats.gameObject.transform);
+                playSFX(abilityToUse);
                 yield return new WaitForSeconds(1.5f);
                 Destroy(blockfx);
                 abilityToUse.Execute(enemyStats, enemyStats);
@@ -385,7 +396,7 @@ public class BattleManager : MonoBehaviour
                     actionText = "Enemy uses " + abilityToUse.abilityName + "!";
                     if (abilityToUse.abilityName == "Slash")
                     {
-                        yield return MoveForwardRoutine(-1);
+                        yield return MoveForwardRoutine(-1, abilityToUse);
                     }
                     else if (abilityToUse.abilityName == "Block")
                     {
@@ -394,6 +405,7 @@ public class BattleManager : MonoBehaviour
                         Destroy(blockfx);
                     }
                     // ... other ability animations
+                    if (abilityToUse.abilityName != "Slash") playSFX(abilityToUse);
                     abilityToUse.Execute(enemyStats, playerStats);
                 }
                 else
@@ -432,7 +444,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    IEnumerator SpawnSlashVFX(int direction, Transform pawn, Transform opp)
+    IEnumerator SpawnSlashVFXnSFX(int direction, Transform pawn, Transform opp, Ability ability)
     {
         // ... (this method is unchanged) ...
         PlayerController.PlayerColor color = player.GetComponent<PlayerController>().startArea;
@@ -451,7 +463,8 @@ public class BattleManager : MonoBehaviour
         }
 
         GameObject vfx = Instantiate(vfxToSpawn, pawn.position, Quaternion.Euler(spAngle));
-        yield return new WaitForSeconds(0.1f);
+        playSFX(ability);
+        yield return new WaitForSeconds(0.15f);
         GameObject impact = Instantiate(impactVFX, opp);
         cameraShakeManager.Shake(0.8f);
         yield return new WaitForSeconds(0.5f);
@@ -459,7 +472,7 @@ public class BattleManager : MonoBehaviour
         Destroy(vfx);
     }
 
-    private IEnumerator MoveForwardRoutine(int direction)
+    private IEnumerator MoveForwardRoutine(int direction, Ability ability)
     {
         // ... (this method is mostly unchanged) ...
         float moveDistance = 4f;
@@ -471,7 +484,7 @@ public class BattleManager : MonoBehaviour
         Vector3 endPos = startPos + pawn.right * direction * moveDistance;
 
         yield return MoveBetween(pawn, startPos, endPos, moveDuration);
-        yield return SpawnSlashVFX(direction, pawn, opp);
+        yield return SpawnSlashVFXnSFX(direction, pawn, opp, ability);
         yield return MoveBetween(pawn, endPos, startPos, moveDuration);
     }
 
@@ -573,5 +586,13 @@ public class BattleManager : MonoBehaviour
         battleHUDManager.UpdateWarriors();
         battleHUDManager.UpdateStats();
         StartCoroutine(BattleSequence());
+    }
+
+    private void playSFX(Ability ability)
+    {
+        AudioClip audio = ability.sfx;
+        audioPlayer.clip = audio;
+        audioPlayer.pitch = Random.Range(0.8f, 1.2f);
+        audioPlayer.Play();
     }
 }

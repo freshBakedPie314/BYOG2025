@@ -15,6 +15,7 @@ MonoBehaviour:
   abilityName: Stun
   power: 2
   targetType: 0
+  sfx: {fileID: 8300000, guid: 3413fc39ed608ab4f8616f8ed0b64199, type: 3}
   effectType: 1
   effectDuration: 3
   effectPower: 3

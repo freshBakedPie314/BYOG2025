@@ -15,6 +15,7 @@ MonoBehaviour:
   abilityName: Frost
   power: 2
   targetType: 0
+  sfx: {fileID: 8300000, guid: b391cacfe07dbae48a1a89ab7514027d, type: 3}
   effectType: 3
   effectDuration: 2
   effectPower: 5

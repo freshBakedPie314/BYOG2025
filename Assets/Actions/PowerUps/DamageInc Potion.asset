@@ -15,5 +15,6 @@ MonoBehaviour:
   abilityName: Damge Inc
   power: 2
   targetType: 1
+  sfx: {fileID: 8300000, guid: 4ead8e6eaa4d9344fa3b8fc682c7ad68, type: 3}
   buffType: 0
   duration: 3

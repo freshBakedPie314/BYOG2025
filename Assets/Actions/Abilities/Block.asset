@@ -15,3 +15,4 @@ MonoBehaviour:
   abilityName: Block
   power: 75
   targetType: 1
+  sfx: {fileID: 8300000, guid: 31a55b7d9e25e2c4f8072a415c136acf, type: 3}

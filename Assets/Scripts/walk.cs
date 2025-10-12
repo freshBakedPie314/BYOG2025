@@ -18,6 +18,7 @@ public class SimpleCharacterController : MonoBehaviour
 
     void Update()
     {
+        if (!controller || !controller.enabled) return;
         // Check if player is on the ground
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)

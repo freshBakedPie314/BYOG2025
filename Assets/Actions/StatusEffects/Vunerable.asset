@@ -15,6 +15,7 @@ MonoBehaviour:
   abilityName: Quake
   power: 2
   targetType: 0
+  sfx: {fileID: 8300000, guid: d90e5c4c195759b429dfc1081db1db81, type: 3}
   effectType: 2
   effectDuration: 2
   effectPower: 5

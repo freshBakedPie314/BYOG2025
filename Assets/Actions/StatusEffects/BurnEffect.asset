@@ -15,6 +15,7 @@ MonoBehaviour:
   abilityName: Burn
   power: 2
   targetType: 0
+  sfx: {fileID: 8300000, guid: 4992c3a1338e6a04abc62681bc2611ad, type: 3}
   effectType: 0
   effectDuration: 3
   effectPower: 2

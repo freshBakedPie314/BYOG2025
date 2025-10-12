@@ -7,6 +7,7 @@ public class Ability : ScriptableObject
     public int power;
     public enum TargetType { Enemy, Self }
     public TargetType targetType;
+    public AudioClip sfx;
 
     public virtual void Execute(CharacterStats user, CharacterStats target)
     {

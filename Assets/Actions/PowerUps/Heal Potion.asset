@@ -15,3 +15,4 @@ MonoBehaviour:
   abilityName: Heal
   power: 10
   targetType: 1
+  sfx: {fileID: 8300000, guid: fe39143384b5a08409e30bb01efd9289, type: 3}
