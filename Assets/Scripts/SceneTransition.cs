@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Unity.Cinemachine;
-
 using TMPro;
 
 public class ScreenTransition : MonoBehaviour

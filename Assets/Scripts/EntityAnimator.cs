@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor.UI;
 using UnityEngine;
 
 public class EntityAnimator : MonoBehaviour
