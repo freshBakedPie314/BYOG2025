@@ -96,7 +96,12 @@ public class PlayerController : MonoBehaviour
 
         if (playerStats != null && bossSkillRewards.Count > col_id)
         {
-            playerStats.characterAbilities.Add(bossSkillRewards[col_id]);
+            if (col_id == 1)
+                playerStats.characterAbilities.Add(bossSkillRewards[3]);
+            else if (col_id == 3)
+                playerStats.characterAbilities.Add(bossSkillRewards[1]);
+            else playerStats.characterAbilities.Add(bossSkillRewards[col_id]);
+            
             battleHUDManager.UpdateActionButtons(playerStats);
             battleHUDManager.gameObject.SetActive(false);
         }

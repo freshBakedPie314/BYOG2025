@@ -25,6 +25,7 @@ public class BattleManager : MonoBehaviour
     public GameObject IceArena;
     public GameObject ThunderARena;
     public GameObject EarthArena;
+    public GameObject BossArena;
 
     [Header("HUDs & UI")]
     public GameObject boardHUD;
@@ -81,6 +82,7 @@ public class BattleManager : MonoBehaviour
     private bool isAttackInProgress = false;
     private AudioSource audioPlayer;
     public bool isSpawningVFX = false;
+    public bool inBossBattle = false;
     public void Start()
     {
         battleHUDManager = battleHUD.GetComponent<BattleHUDManager>();
@@ -129,14 +131,14 @@ public class BattleManager : MonoBehaviour
         currentEnemyInstance = Instantiate(bossPrefab, enemySpawnPoint.position, rot);
         enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
 
-        enemyStats.maxHealth = 200;
-        enemyStats.currentHealth = 200;
+        enemyStats.maxHealth = 75;
+        enemyStats.currentHealth = 75;
         enemyStats.attackPower = 20;
-        enemyStats.defense = 10;
+        enemyStats.defense = 5;
 
         enemyStats.characterAbilities.Clear();
         enemyStats.characterAbilities.Add(skillToLearn);
-
+        enemyStats.normalAttack = slashAttack;
         playerStats = player.GetComponent<CharacterStats>();
 
         currentState = BattleState.STARTING;
@@ -163,21 +165,27 @@ public class BattleManager : MonoBehaviour
         IceArena.SetActive(false);
         ThunderARena.SetActive(false);
         EarthArena.SetActive(false);
+        BossArena.SetActive(false);
 
-        switch (currentBattleArea)
+        if (!inBossBattle)
         {
-            case AreaType.Fire:
-                FireArena.SetActive(true);
-                break;
-            case AreaType.Earth:
-                EarthArena.SetActive(true);
-                break;
-            case AreaType.Snow:
-                IceArena.SetActive(true);
-                break;
-            case AreaType.Lightning:
-                ThunderARena.SetActive(true);
-                break;
+            switch (currentBattleArea)
+            {
+                case AreaType.Fire:
+                    FireArena.SetActive(true);
+                    break;
+                case AreaType.Earth:
+                    EarthArena.SetActive(true);
+                    break;
+                case AreaType.Snow:
+                    IceArena.SetActive(true);
+                    break;
+                case AreaType.Lightning:
+                    ThunderARena.SetActive(true);
+                    break;
+            }
+        } else {
+            BossArena.SetActive(true);
         }
     }
 
@@ -232,9 +240,9 @@ public class BattleManager : MonoBehaviour
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
-        else if (ability.abilityName == "Burn" || ability.abilityName == "Stun" || ability.abilityName == "Frost")
+        else if (ability.abilityName == "Burn" )
         {
-            GameObject blockfx = Instantiate(dmgVFX, player.transform);
+            GameObject blockfx = Instantiate(burnVFX, enemyStats.gameObject.transform);
             playSFX(ability);
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
@@ -253,9 +261,9 @@ public class BattleManager : MonoBehaviour
             yield return new WaitForSeconds(2.5f);
             Destroy(blockfx);
         }
-        else if (ability.abilityName == "Burn")
+        else if (ability.abilityName == "Frost")
         {
-            GameObject blockfx = Instantiate(burnVFX, enemyStats.gameObject.transform);
+            GameObject blockfx = Instantiate(frostVFX, enemyStats.gameObject.transform);
             cameraShakeManager.Shake(.8f);
             playSFX(ability);
             yield return new WaitForSeconds(2.5f);
@@ -272,14 +280,6 @@ public class BattleManager : MonoBehaviour
         else if (ability.abilityName == "Quake")
         {
             GameObject blockfx = Instantiate(quakeVFX, enemyStats.gameObject.transform);
-            cameraShakeManager.Shake(.8f);
-            playSFX(ability);
-            yield return new WaitForSeconds(2.5f);
-            Destroy(blockfx);
-        }
-        else if (ability.abilityName == "Frost")
-        {
-            GameObject blockfx = Instantiate(frostVFX, enemyStats.gameObject.transform);
             cameraShakeManager.Shake(.8f);
             playSFX(ability);
             yield return new WaitForSeconds(2.5f);
@@ -487,6 +487,8 @@ public class BattleManager : MonoBehaviour
         else if (currentState == BattleState.LOST)
         {
             dialogueText.text = "You were defeated.";
+            yield return new WaitForSeconds(2f);
+            SceneManager.LoadScene(2);
         }
         yield return new WaitForSeconds(3f);
 
@@ -502,7 +504,7 @@ public class BattleManager : MonoBehaviour
         if (player != null) player.GetComponent<PlayerController>().canMove = true;
         if (isUltimateBattle)
         {
-            SceneManager.LoadScene("End_Credits");
+            SceneManager.LoadScene(3);
         }
 
         if (currentEnemyInstance != null)
@@ -523,6 +525,7 @@ public class BattleManager : MonoBehaviour
 
     public void StartUltimateBattle()
     {
+        inBossBattle = true;
         currentBattleArea = AreaType.Fire;
         playerBoardPosition = player.transform.position;
         boardHUD.SetActive(false);
@@ -534,10 +537,10 @@ public class BattleManager : MonoBehaviour
         Quaternion rot = Quaternion.Euler(enemySpawnPoint.rotation.x, enemySpawnPoint.rotation.y, enemySpawnPoint.rotation.z);
         currentEnemyInstance = Instantiate(ultimateBossPrefab, enemySpawnPoint.position, rot);
         enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
-        enemyStats.maxHealth = 6969;
-        enemyStats.currentHealth = 6969;
-        enemyStats.attackPower = 69;
-        enemyStats.defense = 69;
+        enemyStats.maxHealth = 125;
+        enemyStats.currentHealth = 125;
+        enemyStats.attackPower = 32;
+        enemyStats.defense = 16;
         enemyStats.characterAbilities.Clear();
         enemyStats.characterAbilities.Add(fireAreaAbility);
         enemyStats.characterAbilities.Add(snowAreaAbility);
@@ -547,8 +550,6 @@ public class BattleManager : MonoBehaviour
         enemyStats.healAtHealthPercent = 20;
         enemyStats.healingAbility = healAbility;
         playerStats = player.GetComponent<CharacterStats>();
-        boardVCam.Priority = 5;
-        battleVCam.Priority = 10;
         currentState = BattleState.STARTING;
         battleHUDManager.UpdateWarriors();
         battleHUDManager.UpdateStats();

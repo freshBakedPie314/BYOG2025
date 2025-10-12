@@ -26,6 +26,8 @@ public class ActionButtonUI : MonoBehaviour
         {
             button.interactable = playerStats.characterAbilities.Contains(associatedAbility);
             buttonText.text = associatedAbility.name;
+            if (buttonText.text == "Vunerable") buttonText.text = "Quake";
+            else if (buttonText.text == "Weaken") buttonText.text = "Frost";
         }
     }
 
