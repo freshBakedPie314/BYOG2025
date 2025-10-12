@@ -201,6 +201,7 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
+            //test
             if (ability.targetType == Ability.TargetType.Self) ability.Execute(playerStats, playerStats);
             else ability.Execute(playerStats, enemyStats);
         }
