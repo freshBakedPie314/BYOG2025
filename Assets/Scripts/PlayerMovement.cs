@@ -117,10 +117,10 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(AnimateAndMove());
         }
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            currentPathIndex = currentPath.Length - 2;
-        }
+        // if (Input.GetKeyDown(KeyCode.Tab))
+        // {
+        //     currentPathIndex = currentPath.Length - 2;
+        // }
     }
 
     public void SetPlayerColor(PlayerColor color)

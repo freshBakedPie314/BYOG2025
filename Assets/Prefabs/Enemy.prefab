@@ -78,8 +78,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 20
   currentHealth: 0
-  attackPower: 10
-  defense: 5
+  attackPower: 7
+  defense: 3
   characterAbilities:
   - {fileID: 11400000, guid: 13b69619b9f1b0748bcd8540a7d217e5, type: 2}
   activeStatusEffects: []

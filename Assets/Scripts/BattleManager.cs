@@ -131,9 +131,9 @@ public class BattleManager : MonoBehaviour
         currentEnemyInstance = Instantiate(bossPrefab, enemySpawnPoint.position, rot);
         enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
 
-        enemyStats.maxHealth = 75;
-        enemyStats.currentHealth = 75;
-        enemyStats.attackPower = 20;
+        enemyStats.maxHealth = 50;
+        enemyStats.currentHealth = 50;
+        enemyStats.attackPower = 12;
         enemyStats.defense = 5;
 
         enemyStats.characterAbilities.Clear();
@@ -537,10 +537,10 @@ public class BattleManager : MonoBehaviour
         Quaternion rot = Quaternion.Euler(enemySpawnPoint.rotation.x, enemySpawnPoint.rotation.y, enemySpawnPoint.rotation.z);
         currentEnemyInstance = Instantiate(ultimateBossPrefab, enemySpawnPoint.position, rot);
         enemyStats = currentEnemyInstance.AddComponent<CharacterStats>();
-        enemyStats.maxHealth = 125;
-        enemyStats.currentHealth = 125;
-        enemyStats.attackPower = 32;
-        enemyStats.defense = 16;
+        enemyStats.maxHealth = 100;
+        enemyStats.currentHealth = 100;
+        enemyStats.attackPower = 24;
+        enemyStats.defense = 12;
         enemyStats.characterAbilities.Clear();
         enemyStats.characterAbilities.Add(fireAreaAbility);
         enemyStats.characterAbilities.Add(snowAreaAbility);

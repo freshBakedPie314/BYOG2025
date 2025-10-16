@@ -17,6 +17,6 @@ public class UIManager : MonoBehaviour
     
     public void ToMain()
     {
-        SceneManager.LoadScene(0);
+        SceneManager.LoadSceneAsync(0);
     }
 }

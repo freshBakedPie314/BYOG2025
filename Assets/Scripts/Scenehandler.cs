@@ -4,22 +4,16 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 public class Scenehandler : MonoBehaviour
 {
-    public static Scenehandler Instance { get; private set; }
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     public GameObject LoaderCanvas;
     public Slider progressSliderl;
-    private void Awake()
+   
+    
+    void Start()
     {
-        if(Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        LoaderCanvas.SetActive(false);
     }
     public void LoadGame()
     {
@@ -49,9 +43,8 @@ public class Scenehandler : MonoBehaviour
             progressSliderl.value = scene.progress;
         } while (scene.progress < 0.9f);
         await Task.Delay(1000);
-        LoaderCanvas.SetActive(false);
+        //LoaderCanvas.SetActive(false);
         scene.allowSceneActivation = true;
-
 
     }
 }
